@@ -1,3 +1,4 @@
+from fastapi import HTTPException, status
 from app.database.db_main import engine
 from sqlmodel import Session, select, update
 from app.database.user_crud import get_user_by_id_from_db
@@ -268,32 +269,7 @@ def add_traveller_to_the_trip_in_db(trip_id: int, user_id: int):
             session.add(link)
             session.commit()
             session.refresh(link)
-        except Exception as e:
-            session.rollback()
-            raise e
-        
-def remove_trip_from_db(trip_id: int):
-    with Session(engine) as session:
-        try:
-            statement = select(UserTripLink).where(UserTripLink.trip_id == trip_id)
-            result = session.exec(statement).all()
-            if result:
-                for item in result:
-                    session.delete(item)
-                    session.commit()
-
-            statement = select(Expense).where(Expense.trip_id == trip_id)
-            result = session.exec(statement).all()
-            if result:
-                for item in result:
-                    session.delete(item)
-                    session.commit()
-
-            statement = select(Trip).where(Trip.id == trip_id)
-            result = session.exec(statement).first()
-            if result:
-                session.delete(result)
-                session.commit()
+            return {"message": "User added to the trip successfully"}
         except Exception as e:
             session.rollback()
             raise e
@@ -306,6 +282,36 @@ def remove_traveller_from_the_trip_in_db(trip_id: int, user_id: int):
             if result:
                 session.delete(result)
                 session.commit()
+                return {"message": "User removed from the trip successfully"}
+            else:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        except Exception as e:
+            session.rollback()
+            raise e
+        
+def remove_trip_from_db(trip_id: int):
+    with Session(engine) as session:
+        try:
+            statement = select(UserTripLink).where(UserTripLink.trip_id == trip_id)
+            result = session.exec(statement).all()
+            for item in result:
+                session.delete(item)
+                session.commit()
+
+            statement = select(Expense).where(Expense.trip_id == trip_id)
+            result = session.exec(statement).all()
+            for item in result:
+                session.delete(item)
+                session.commit()
+
+            statement = select(Trip).where(Trip.id == trip_id)
+            result = session.exec(statement).first()
+            if result:
+                session.delete(result)
+                session.commit()
+                return {"message": "Trip deleted successfully"}
+            else:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found")
         except Exception as e:
             session.rollback()
             raise e
@@ -325,7 +331,7 @@ def update_trip_startdate_and_enddate_in_db(trip_id: int, trip_start_date: Optio
             if statement is not None:
                 result = session.exec(statement)
                 session.commit()
-                return result
+                return {"message": "Date updated successfully"}
         except Exception as e:
             session.rollback()
             raise e
@@ -336,7 +342,7 @@ def update_trip_title_in_db(trip_id: int, trip_title: str):
             statement = update(Trip).where(Trip.id == trip_id).values(title = trip_title)
             result = session.exec(statement)
             session.commit()
-            return result
+            return {"message": "Title updated successfully"}
         except Exception as e:
             session.rollback()
             raise e

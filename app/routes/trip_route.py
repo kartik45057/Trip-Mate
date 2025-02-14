@@ -101,18 +101,19 @@ def get_filtered_trips_based_on_dates_and_title_for_user(trips_created_by_user_i
     
     return result
 
-@router.put("/trip/traveller/add", status_code=status.HTTP_204_NO_CONTENT)
+@router.put("/trip/traveller/add", status_code=status.HTTP_200_OK)
 def add_traveller_to_the_trip(trip_id: int, user_id: int, current_user: User_Read = Depends(get_current_user)):
     try:
         trip = get_trip_by_id_from_db(trip_id)
         if not trip.created_by_id == current_user.id:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Insufficient privileges")
 
-        add_traveller_to_the_trip_in_db(trip_id, user_id)
+        result = add_traveller_to_the_trip_in_db(trip_id, user_id)
+        return result
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
 
-@router.put("/trip/update/dates", status_code=status.HTTP_204_NO_CONTENT)
+@router.put("/trip/update/dates", status_code=status.HTTP_200_OK)
 def update_trip_startdate_and_enddate(trip_id: int, start_date: Optional[date] = Query(None), end_date: Optional[date] = Query(None), current_user: User_Read = Depends(get_current_user)):
     if not (start_date or end_date):
             raise HTTPException(status_code=status.HTTP_200_OK, detail=f"start date or end date not passed")
@@ -121,11 +122,12 @@ def update_trip_startdate_and_enddate(trip_id: int, start_date: Optional[date] =
         if not trip.created_by_id == current_user.id:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Insufficient privileges")
 
-        update_trip_startdate_and_enddate_in_db(trip_id, start_date, end_date)
+        result = update_trip_startdate_and_enddate_in_db(trip_id, start_date, end_date)
+        return result
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
 
-@router.put("/trip/update/title", status_code=status.HTTP_204_NO_CONTENT)
+@router.put("/trip/update/title", status_code=status.HTTP_200_OK)
 def update_trip_title(trip_id: int, title: str, current_user: User_Read = Depends(get_current_user)):
     try:
         current_user_email = current_user.email
@@ -134,11 +136,12 @@ def update_trip_title(trip_id: int, title: str, current_user: User_Read = Depend
         if not trip.created_by_id == current_user_details.id:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Insufficient privileges")
 
-        update_trip_title_in_db(trip_id, title)
+        result = update_trip_title_in_db(trip_id, title)
+        return result
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
 
-@router.delete("/trip/remove", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/trip/remove", status_code=status.HTTP_200_OK)
 def delete_trip(trip_id: int, current_user: User_Read = Depends(get_current_user)):
     try:
         current_user_email = current_user.email
@@ -149,11 +152,12 @@ def delete_trip(trip_id: int, current_user: User_Read = Depends(get_current_user
         if not trip.created_by_id == current_user_details.id:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Insufficient privileges")
 
-        remove_trip_from_db(trip_id)
+        result = remove_trip_from_db(trip_id)
+        return result
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
 
-@router.delete("/trip/traveller/remove", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/trip/traveller/remove", status_code=status.HTTP_200_OK)
 def remove_traveller_from_the_trip(trip_id: int, user_id: int, current_user: User_Read = Depends(get_current_user)):
     try:
         current_user_email = current_user.email
@@ -164,6 +168,7 @@ def remove_traveller_from_the_trip(trip_id: int, user_id: int, current_user: Use
         if not trip.created_by_id == current_user_details.id:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Insufficient privileges")
 
-        remove_traveller_from_the_trip_in_db(trip_id, user_id)
+        result = remove_traveller_from_the_trip_in_db(trip_id, user_id)
+        return result
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
