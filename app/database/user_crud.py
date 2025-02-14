@@ -26,10 +26,10 @@ def get_user_by_email(email: EmailStr):
         except Exception as e:
             raise e
     
-def get_all_users_from_db():
+def get_all_users_from_db(offset, limit):
     with Session(engine) as session:
         try:
-            statement = select(User)
+            statement = select(User).order_by(User.name).offset(offset).limit(limit)
             result = session.exec(statement).all()
             return result
         except Exception as e:

@@ -1,5 +1,5 @@
 from datetime import timedelta
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, Query, status, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from app.database.user_crud import *
 from app.models import User_Create, User_Read, Token
@@ -32,13 +32,13 @@ def register_user(user: User_Create):
         raise HTTPException(status_code=400, detail=f"An error occurred: {str(e)}")
 
 @router.get("/user/all", status_code=status.HTTP_200_OK, response_model=List[User_Read])
-def get_all_users(current_user: User_Read = Depends(get_current_user)):
+def get_all_users(offset: int = Query(ge=0), limit: int = Query(ge=0), current_user: User_Read = Depends(get_current_user)):
     current_user_email = current_user.email
     if not current_user_email == admin_user_email:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Insufficient privileges")
 
     try:
-        result = get_all_users_from_db()
+        result = get_all_users_from_db(offset, limit)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
     

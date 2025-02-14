@@ -47,10 +47,10 @@ def create_trip_in_db(trip: Trip_Create, current_user: User):
         session.rollback()
         raise e
     
-def get_all_trips_from_db():
+def get_all_trips_from_db(offset, limit):
     with Session(engine) as session:
         try:
-            statement = select(Trip).options(orm.selectinload(Trip.created_by))
+            statement = select(Trip).order_by(Trip.title).offset(offset).limit(limit).options(orm.selectinload(Trip.created_by))
             result = session.exec(statement).all()
             for item in result:
                 users = item.users

@@ -63,10 +63,18 @@ class Payment_Read_basic(BaseModel):
 
 class Expense_Create(BaseModel):
     description: Optional[str] = Field(default=None, min_length=10, max_length=100, description="Details of expense, eg: 2000 rupees spend for dinner at cafe")
-    amount: float = Field(gt=0, description="Total amount paid as a part of this expense")
     trip_id: int = Field(description="id of the trip this expense is part of")
     payments: List[Payment_Create] = Field(description="Stores the payments done as part of this expense which tells who has contributed how much in the total amount paid as part of this expense")
     users: List[int] = Field(description="List of ids of users between whom amount needs to be splitted")
+
+    @property
+    def amount(self) -> str:
+        payments = self.payments
+        total_amount = 0
+        for payment in payments:
+            total_amount += payment.amount
+
+        return total_amount
 
 class Expense_Read(BaseModel):
     id: int = Field(description="Unique identifier for the expense")

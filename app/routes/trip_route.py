@@ -23,9 +23,9 @@ def create_trip(trip: Trip_Create, current_user: User_Read = Depends(get_current
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
 
 @router.get("/trip/all", status_code=status.HTTP_200_OK, response_model=List[Trip_Read_without_expenses])
-def get_all_trips():
+def get_all_trips(offset: int = Query(ge=0), limit: int = Query(gt=0)):
     try:
-        result = get_all_trips_from_db()
+        result = get_all_trips_from_db(offset, limit)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
     
