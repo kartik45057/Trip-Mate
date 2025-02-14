@@ -1,0 +1,15 @@
+# Compiled source code
+*.exe
+
+# Logs and temporary files
+learning
+Trip Planner.db
+
+# IDE specific files
+.vscode/    # VS Code
+
+# Environment variables
+.venv/
+
+# Dependencies
+__pycache__/
