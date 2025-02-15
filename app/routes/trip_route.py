@@ -36,9 +36,7 @@ def get_all_trips(offset: int = Query(ge=0), limit: int = Query(gt=0)):
 @router.get("/trip/{trip_id}", status_code=status.HTTP_200_OK, response_model=Trip_Read)
 def get_trip_by_id(trip_id: int):
     try:
-        result = get_trip_by_id_from_db(trip_id)   
-    except NoResultFound:
-        result = None
+        result = get_trip_by_id_from_db(trip_id) 
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
     

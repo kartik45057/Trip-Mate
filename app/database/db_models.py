@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, timezone
 import re
 from pydantic import EmailStr, field_validator, validator
 from sqlalchemy import UniqueConstraint
@@ -53,9 +53,13 @@ class Payment(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     currency: CurrencyCode
     amount: float
-    payment_mode: PaymentMode 
+    payment_mode: PaymentMode
+    payment_date: datetime = Field(default=None, description="Date and time of the payment") # Date and time of payment 
+    notes: Optional[str] = Field(default=None, description="Any notes related to the payment")  # Optional notes
     user_id: int | None = Field(default=None, foreign_key="user.id")
     expense_id: int | None = Field(default=None, foreign_key="expense.id")
 
     user: User | None = Relationship(back_populates="payments")
     expense: Expense | None = Relationship(back_populates="payments")
+
+    __table_args__ = (UniqueConstraint("currency", "amount", "payment_mode", "user_id", "expense_id", name="unique_trip_constraint"),)
