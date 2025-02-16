@@ -1,5 +1,6 @@
 from sqlmodel import Session, select
 from app.database.db_models import Expense, Payment, Trip, User
+from app.database.payment_crud import get_payment_by_ids_from_db
 from app.models import Expense_Create
 from app.database.db_main import engine
 from sqlalchemy.orm import selectinload
@@ -28,10 +29,12 @@ def create_expense_in_db(expense: Expense_Create, current_user: User):
         session.rollback()
         raise e
     
-def get_all_expenses_for_the_trip_from_db(trip_id: int):
+def get_all_expenses_for_the_trip_from_db(trip_id: int, offset: int, limit: int):
     with Session(engine) as session:
         try:
             statement = select(Expense).where(Expense.trip_id == trip_id).options(selectinload(Expense.users))
+            statement = statement.order_by(Expense.id)
+            statement = statement.offset(offset).limit(limit)
             result = session.exec(statement).all()
             for item in result:
                 payments = item.payments
@@ -47,7 +50,9 @@ def get_expense_details_from_db(expense_id: int):
             statement = select(Expense).where(Expense.id == expense_id).options(selectinload(Expense.users))
             result = session.exec(statement).first()
             payments = result.payments
-            trip = result.trip
+            for payment in payments:
+                user = payment.user
+
             return result
         except Exception as e:
             raise e

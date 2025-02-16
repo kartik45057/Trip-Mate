@@ -54,8 +54,8 @@ class Payment(SQLModel, table=True):
     currency: CurrencyCode
     amount: float
     payment_mode: PaymentMode
-    payment_date: datetime = Field(default=None, description="Date and time of the payment") # Date and time of payment 
-    notes: Optional[str] = Field(default=None, description="Any notes related to the payment")  # Optional notes
+    #payment_date: datetime = Field(default=None, description="Date and time of the payment") # Date and time of payment 
+    #notes: Optional[str] = Field(default=None, description="Any notes related to the payment")  # Optional notes
     user_id: int | None = Field(default=None, foreign_key="user.id")
     expense_id: int | None = Field(default=None, foreign_key="expense.id")
 

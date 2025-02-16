@@ -43,6 +43,15 @@ def get_user_by_id_from_db(user_id: int):
             return result
         except Exception as e:
             raise e
+        
+def get_user_by_ids_from_db(user_ids: List[int]):
+    with Session(engine) as session:
+        try:
+            statement = select(User).where(User.id.in_(user_ids))
+            result = session.exec(statement).all()
+            return result
+        except Exception as e:
+            raise e
 
 def get_trips_created_by_user_from_db(offset, limit, email: EmailStr):
     with Session(engine) as session:

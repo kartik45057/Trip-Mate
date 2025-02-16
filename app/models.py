@@ -54,6 +54,7 @@ class Payment_Read(BaseModel):
     amount: float = Field(description="The amount of the payment in the specified currency")
     payment_mode: PaymentMode = Field(description="The mode of the payment (allowed values: Cash, Credit Card, Debit Card, UPI etc)")
     user_id: int = Field(description="user id of user who has done the payment")
+    user: User_Read = Field(description="user who has done the payment")
 
 class Payment_Read_basic(BaseModel):
     id: int = Field(description="Unique identifier for the payment")

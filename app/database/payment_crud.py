@@ -1,15 +1,25 @@
+from typing import List
 from sqlmodel import Session, select, update
 from app.database.db_models import Expense, Payment, Trip, User
 from app.models import Expense_Create
 from app.database.db_main import engine
 from sqlalchemy.orm import selectinload
         
-def get_payment_by_id_from_db(payment_id):
+def get_payment_by_id_from_db(payment_id: int):
     with Session(engine) as session:
         try:
             statement = select(Payment).where(Payment.id == payment_id).options(selectinload(Payment.expense))
             result = session.exec(statement).first()
             payment_part_of_expense = result.expense
+            return result
+        except Exception as e:
+            raise e
+
+def get_payment_by_ids_from_db(payment_ids: List[int]):
+    with Session(engine) as session:
+        try:
+            statement = select(Payment).where(Payment.id.in_(payment_ids)).options(selectinload(Payment.user))
+            result = session.exec(statement).all()
             return result
         except Exception as e:
             raise e
