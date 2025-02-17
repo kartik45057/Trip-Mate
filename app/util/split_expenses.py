@@ -13,7 +13,7 @@ def Distribute_Amounts(expenses, split_between, exchanges_rates_INR):
         if expense.payments:
             payments = expense.payments
             for payment in payments:
-                user_id = payment.user_id
+                user_id = payment.user.id
                 amount_paid_by_user = payment.amount
                 currency = payment.currency
                 if not currency == CurrencyCode.INR:
@@ -134,59 +134,3 @@ def Get_Equal_Share_Distribution(expenses, exchanges_rates_INR):
                         merged_dict.pop(user_to_be_paid)
 
     return merged_dict
-
-
-
-expenses = [Expense_Read(**{
-  "id": 2,
-  "description": "dinner day 2",
-  "amount": 1000,
-  "trip_id": 1,
-  "users": [
-    {
-      "id": 2,
-      "name": "kartik singh",
-      "email": "kartiksingh@gmail.com",
-      "date_of_birth": "2001-04-07"
-    },
-    {
-      "id": 3,
-      "name": "vatsal mishra",
-      "email": "vatsalmishra@gmail.com",
-      "date_of_birth": "2000-07-12"
-    }
-  ],
-  "payments": [
-    {
-      "id": 1,
-      "currency": "INR",
-      "amount": 700,
-      "payment_mode": "Cash",
-      "user_id": 2,
-      "user": {
-        "id": 2,
-        "name": "kartik singh",
-        "email": "kartiksingh@gmail.com",
-        "date_of_birth": "2001-04-07"
-      }
-    },
-    {
-      "id": 2,
-      "currency": "USD",
-      "amount": 300,
-      "payment_mode": "Cash",
-      "user_id": 3,
-      "user": {
-        "id": 3,
-        "name": "vatsal mishra",
-        "email": "vatsalmishra@gmail.com",
-        "date_of_birth": "2000-07-12"
-      }
-    }
-  ]
-})]
-
-if __name__ == "__main__":
-    exchanges_rates_INR = get_exchange_rates()
-    result = Get_Equal_Share_Distribution(expenses, exchanges_rates_INR)
-    print(Get_Display_Messages(result))

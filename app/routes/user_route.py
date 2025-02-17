@@ -85,7 +85,7 @@ def get_trips_participated_by_user(offset: int = Query(ge=0), limit: int = Query
     
     return result
 
-@router.get("/users/me/payments", status_code=status.HTTP_200_OK, response_model=List[Payment_Read_basic])
+@router.get("/users/me/payments", status_code=status.HTTP_200_OK, response_model=List[Payment_Read_without_user])
 def get_payments_done_by_user(offset: int = Query(ge=0), limit: int = Query(ge=0), current_user: User_Read = Depends(get_current_user)):
     try: 
         current_user_email = current_user.email

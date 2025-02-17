@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 import re
 from typing import Dict, List, Optional
 from pydantic import BaseModel, EmailStr, Field, field_validator
@@ -46,21 +46,33 @@ class Payment_Create(BaseModel):
     currency: CurrencyCode = Field(description="The currency of the payment (allowed values: INR, USD, EUR)")
     amount: float = Field(description="The amount of the payment in the specified currency")
     payment_mode: PaymentMode = Field(description="The mode of the payment (allowed values: Cash, Credit Card, Debit Card, UPI etc)")
+    payment_date: datetime = Field(default=None, description="Date and time of the payment")
+    notes: Optional[str] = Field(default=None, max_length=100 ,description="Any notes related to the payment")
     user_id: int = Field(description="user id of user who has done the payment")
+    expense_id: int = Field(description="Expense id the payment is part of")
 
 class Payment_Read(BaseModel):
     id: int = Field(description="Unique identifier for the payment")
     currency: CurrencyCode = Field(description="The currency of the payment (allowed values: INR, USD, EUR)")
     amount: float = Field(description="The amount of the payment in the specified currency")
     payment_mode: PaymentMode = Field(description="The mode of the payment (allowed values: Cash, Credit Card, Debit Card, UPI etc)")
-    user_id: int = Field(description="user id of user who has done the payment")
     user: User_Read = Field(description="user who has done the payment")
+    payment_date: datetime = Field(default=None, description="Date and time of the payment")
+    notes: Optional[str] = Field(default=None, max_length=100 ,description="Any notes related to the payment")
 
-class Payment_Read_basic(BaseModel):
+class Payment_Read_without_user(BaseModel):
     id: int = Field(description="Unique identifier for the payment")
     currency: CurrencyCode = Field(description="The currency of the payment (allowed values: INR, USD, EUR)")
     amount: float = Field(description="The amount of the payment in the specified currency")
     payment_mode: PaymentMode = Field(description="The mode of the payment (allowed values: Cash, Credit Card, Debit Card, UPI etc)")
+    payment_date: datetime = Field(default=None, description="Date and time of the payment")
+    notes: Optional[str] = Field(default=None, max_length=100 ,description="Any notes related to the payment")
+
+class Payment_Split_Exp(BaseModel):
+    id: int = Field(description="Unique identifier for the payment")
+    currency: CurrencyCode = Field(description="The currency of the payment (allowed values: INR, USD, EUR)")
+    amount: float = Field(description="The amount of the payment in the specified currency")
+    user: User_Read = Field(description="user who has done the payment")
 
 class Expense_Create(BaseModel):
     description: Optional[str] = Field(default=None, min_length=10, max_length=100, description="Details of expense, eg: 2000 rupees spend for dinner at cafe")
@@ -68,28 +80,19 @@ class Expense_Create(BaseModel):
     payments: List[Payment_Create] = Field(description="Stores the payments done as part of this expense which tells who has contributed how much in the total amount paid as part of this expense")
     users: List[int] = Field(description="List of ids of users between whom amount needs to be splitted")
 
-    @property
-    def amount(self) -> str:
-        payments = self.payments
-        total_amount = 0
-        for payment in payments:
-            total_amount += payment.amount
-
-        return total_amount
-
 class Expense_Read(BaseModel):
     id: int = Field(description="Unique identifier for the expense")
     description: Optional[str] = Field(default=None, min_length=10, max_length=100, description="Details of expense, eg: 2000 rupees spend for dinner at cafe")
-    amount: float = Field(gt=0, description="Total amount paid as a part of this expense")
     trip_id: int = Field(description="id of the trip this expense is part of")
     users: List[User_Read] = Field(description="List of users between whom amount needs to be splitted")
     payments: List[Payment_Read] = Field(description="Payments done as a part of this expense")
 
-class Expense_Read_basic(BaseModel):
+class Expense_Split_Exp(BaseModel):
     id: int = Field(description="Unique identifier for the expense")
-    description: Optional[str] = Field(default=None, min_length=10, max_length=100, description="Details of expense, eg: 2000 rupees spend for dinner at cafe")
-    amount: float = Field(gt=0, description="Total amount paid as a part of this expense")
     trip_id: int = Field(description="id of the trip this expense is part of")
+    description: Optional[str] = Field(default=None, min_length=10, max_length=100, description="Details of expense, eg: 2000 rupees spend for dinner at cafe")
+    users: List[User_Read] = Field(description="List of users between whom amount needs to be splitted")
+    payments: List[Payment_Split_Exp] = Field(description="Payments done as a part of this expense")
 
 class Trip_Create(BaseModel):
     title: str = Field(min_length=3, max_length=50, description="Title of the trip")

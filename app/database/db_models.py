@@ -20,6 +20,8 @@ class User(SQLModel, table=True):
     password: str
     name: str = Field(min_length=2, max_length=50)
     date_of_birth: date
+    currency: CurrencyCode
+    created_at: datetime = Field(default_factory=datetime.now(timezone.utc), description="Account creation timestamp")
 
     user_created_trips: List["Trip"] = Relationship(back_populates="created_by", sa_relationship_kwargs={"lazy": "selectin"},)
     trips: List["Trip"] = Relationship(back_populates="users", link_model=UserTripLink)
@@ -32,6 +34,7 @@ class Trip(SQLModel, table=True):
     start_date: date
     end_date: Optional[date] = Field(default=None)
     created_by_id: int = Field(foreign_key="user.id")
+    created_at: datetime = Field(default_factory=datetime.now(timezone.utc), description="Trip creation timestamp")
 
     created_by: Optional[User] = Relationship(back_populates="user_created_trips", sa_relationship_kwargs={"lazy": "selectin"},)
     users: Optional[List[User]] = Relationship(back_populates="trips", link_model=UserTripLink)
@@ -42,8 +45,8 @@ class Trip(SQLModel, table=True):
 class Expense(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     description: Optional[str] = Field(default=None, min_length=10, max_length=100)
-    amount: float = Field(gt=0)
     trip_id: int | None = Field(default=None, foreign_key="trip.id")
+    created_at: datetime = Field(default_factory=datetime.now(timezone.utc), description="Expense creation timestamp")
 
     users: List[User] = Relationship(back_populates="expenses", link_model=UserExpenseLink)
     trip: Trip | None = Relationship(back_populates="expenses")
@@ -54,12 +57,13 @@ class Payment(SQLModel, table=True):
     currency: CurrencyCode
     amount: float
     payment_mode: PaymentMode
-    #payment_date: datetime = Field(default=None, description="Date and time of the payment") # Date and time of payment 
-    #notes: Optional[str] = Field(default=None, description="Any notes related to the payment")  # Optional notes
+    payment_date: datetime = Field(default=None, description="Date and time of the payment") # Date and time of payment 
+    notes: Optional[str] = Field(default=None, description="Any notes related to the payment")  # Optional notes
+    created_at: datetime = Field(default_factory=datetime.now(timezone.utc), description="Payment creation timestamp")
     user_id: int | None = Field(default=None, foreign_key="user.id")
     expense_id: int | None = Field(default=None, foreign_key="expense.id")
 
     user: User | None = Relationship(back_populates="payments")
     expense: Expense | None = Relationship(back_populates="payments")
 
-    __table_args__ = (UniqueConstraint("currency", "amount", "payment_mode", "user_id", "expense_id", name="unique_trip_constraint"),)
+    __table_args__ = (UniqueConstraint("currency", "amount", "payment_mode", "user_id", "expense_id", "payment_date", name="unique_payment_constraint"),)
