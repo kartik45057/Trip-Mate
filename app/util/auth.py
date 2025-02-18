@@ -42,10 +42,10 @@ def verify_password(plain_password: str, hashed_password: str):
     is_verified = pwd_context.verify(plain_password, hashed_password)
     return is_verified
 
-def authenticate_user(email: EmailStr, password: str):
+def authenticate_user(email: EmailStr, password: str, session: Session):
     try:
         #fetch user details based on email from database
-        user = get_user_by_email(email)
+        user = get_user_by_email(email, session)
     except Exception as e:
         raise e
 
