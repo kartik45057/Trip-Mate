@@ -4,6 +4,8 @@ from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from pydantic import EmailStr
 from jose import JWTError, jwt
+from sqlmodel import Session
+from app.database.db_main import engine
 from app.database.user_crud import get_user_by_email
 
 SECRET_KEY = "83daa0256a2289b0fb23693bf1f6034d44396675749244721a2b50e896e11662"
@@ -93,16 +95,18 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     credential_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                          detail="Could not validate credentials", headers={"WWW-Authenticate": "Bearer"})
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        userEmail = payload.get("sub")
-        if userEmail is None:
-            raise credential_exception
-        
-        user = get_user_by_email(userEmail)
-        if user is None:
-            raise credential_exception
+        with Session(engine) as session:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            userEmail = payload.get("sub")
+            if userEmail is None:
+                raise credential_exception
 
-        return user
+            user = get_user_by_email(userEmail, session)
+
+            if user is None:
+                raise credential_exception
+
+            return user
     except JWTError:
         raise credential_exception
     except Exception as e:
