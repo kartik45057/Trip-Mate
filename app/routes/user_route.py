@@ -49,7 +49,7 @@ def get_all_users(offset: int = Query(ge=0), limit: int = Query(ge=0), current_u
     return result
 
 @router.get("/user/me", status_code=status.HTTP_200_OK, response_model=User_Read)
-def get_current_user_data(current_user: User_Read = Depends(get_current_user), session: Session = Depends(get_session)):
+def get_current_user(current_user: User_Read = Depends(get_current_user), session: Session = Depends(get_session)):
     try:
         current_user_email = current_user.email
         result = get_user_by_email(current_user_email, session)

@@ -4,6 +4,7 @@
 # Logs and temporary files
 learning
 Trip Planner.db
+Test.db
 
 # IDE specific files
 .vscode/    # VS Code

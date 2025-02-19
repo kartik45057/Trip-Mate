@@ -9,7 +9,6 @@ class User_Create(BaseModel):
     email: EmailStr = Field(description="User's Email id")
     password: str
     date_of_birth: date = Field(description="User's date of birth")
-    currency: Optional[CurrencyCode] = Field(default="INR", description="User's currency")
     
     @field_validator("password")
     def validate_password(cls, password):
