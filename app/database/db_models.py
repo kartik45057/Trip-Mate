@@ -18,7 +18,8 @@ class User(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     email: EmailStr = Field(sa_column_kwargs={"unique": True})
     password: str
-    name: str = Field(min_length=2, max_length=50)
+    username: str = Field(min_length=3, max_length=15, sa_column_kwargs={"unique": True}, index=True)
+    full_name: str = Field(min_length=2, max_length=50)
     date_of_birth: date
     currency: CurrencyCode = Field(default="INR")
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc) if datetime.now(timezone.utc) else None, description="Account creation timestamp")

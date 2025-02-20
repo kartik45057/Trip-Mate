@@ -34,12 +34,13 @@ def create_trip_in_db(trip: Trip_Create, current_user: User, session: Session):
             end_date=new_trip.end_date,
             created_by=User_Read(
                 id=new_trip.created_by.id,
-                name=new_trip.created_by.name,
+                full_name=new_trip.created_by.full_name,
+                username=new_trip.created_by.username,
                 email=new_trip.created_by.email,
                 date_of_birth=new_trip.created_by.date_of_birth
             ),
             users=[
-                User_Read(id=user.id, name=user.name, email=user.email, date_of_birth=user.date_of_birth) for user in new_trip.users
+                User_Read(id=user.id, full_name=user.full_name, username=user.username, email=user.email, date_of_birth=user.date_of_birth) for user in new_trip.users
             ],
         )
         return trip_response

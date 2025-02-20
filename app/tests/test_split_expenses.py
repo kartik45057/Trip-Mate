@@ -3,7 +3,7 @@
 from app.models import Expense_Split_Exp, User_Read, Payment_Split_Exp
 from app.thirdPartyApi.exchange_rates import get_exchange_rates
 from app.util.split_expenses import Get_Display_Messages, Get_Equal_Share_Distribution
-
+"""
 user1 = User_Read(**{
       "id": 1,
       "name": "kartik singh",
@@ -53,7 +53,7 @@ expenses1 = [Expense_Split_Exp(**{
   "users": [user1, user2],
   "payments": [payment1, payment2]
 })]
-"""
+
 exchanges_rates_INR = get_exchange_rates()
 
 def test_1():
@@ -61,3 +61,5 @@ def test_1():
     result = Get_Display_Messages(amount_to_be_received_and_from_by_userid)
     assert result == ['2 needs to give INR 200.0 to 1']
 """  
+
+

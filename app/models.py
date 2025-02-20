@@ -5,11 +5,12 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 from app.enums import CurrencyCode, PaymentMode
 
 class User_Create(BaseModel):
-    name: str = Field(min_length=2, max_length=50, description="User's name")
+    full_name: str = Field(min_length=2, max_length=50, description="User's full name")
+    username: str = Field(min_length=3, max_length=15, description="Unique name for user")
     email: EmailStr = Field(description="User's Email id")
     password: str
     date_of_birth: date = Field(description="User's date of birth")
-    
+
     @field_validator("password")
     def validate_password(cls, password):
         try:
@@ -38,7 +39,8 @@ class User_Create(BaseModel):
 
 class User_Read(BaseModel):
     id: int = Field(description="Unique identifier for the user")
-    name: str = Field(min_length=2, max_length=50, description="User's name")
+    full_name: str = Field(min_length=2, max_length=50, description="User's full name")
+    username: str = Field(min_length=2, max_length=50, description="Unique name for user")
     email: EmailStr = Field(description="User's Email id")
     date_of_birth: date = Field(description="User's date of birth")
 
