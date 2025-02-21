@@ -230,7 +230,7 @@ def test_get_user_by_id_for_non_existing_user(client: TestClient, test_session: 
     assert response.status_code == 404
     assert response.json() == {'detail': 'User not found'}
 
-def test_update_user_name(client: TestClient, test_session: Session):
+def test_update_user_full_name(client: TestClient, test_session: Session):
     statement = select(User).where(User.id == 1)
     result = test_session.exec(statement).first()
     assert result.full_name == "kartik"
@@ -243,6 +243,24 @@ def test_update_user_name(client: TestClient, test_session: Session):
     statement = select(User).where(User.id == 1)
     result = test_session.exec(statement).first()
     assert result.full_name == "kartik singh"
+
+def test_update_username(client: TestClient, test_session: Session):
+    statement = select(User).where(User.id == 1)
+    result = test_session.exec(statement).first()
+    assert result.username == "kartik"
+
+    response = client.put("/user/me/username/?username=kartik._.singh")
+    assert response.status_code == 200
+    assert response.json() == {'message': "username updated successfully"}
+
+    statement = select(User).where(User.id == 1)
+    result = test_session.exec(statement).first()
+    assert result.username == "kartik._.singh"
+
+    #reverse update
+    response = client.put("/user/me/username/?username=kartik")
+    assert response.status_code == 200
+    assert response.json() == {'message': "username updated successfully"}
 
 def test_update_user_date_of_birth(client: TestClient, test_session: Session):
     response = client.put("/user/me/dob/?date_of_birth=2001-04-07")
@@ -268,7 +286,7 @@ def test_create_trip_with_user1_as_current_user(client: TestClient, test_session
 
     response = client.post("/trip", json=trip1)
     assert response.status_code == 201
-    assert response.json() == {'id': 1, 'title': 'Kedarnath, Haridwar, Nainital', 'start_date': '2025-03-20', 'end_date': None, 'created_by': {'id': 1, 'full_name': 'kartik singh', 'username': 'kartik', 'email': 'kartiksingh@gmail.com', 'date_of_birth': '2001-04-07'}, 'users': [{'id': 1, 'full_name': 'kartik singh', 'username': 'kartik', 'email': 'kartiksingh@gmail.com', 'date_of_birth': '2001-04-07'}, {'id': 3, 'full_name': 'suman', 'username': 'suman', 'email': 'sumansingh137@gmail.com', 'date_of_birth': '1975-06-11'}, {'id': 4, 'full_name': 'arvind', 'username': 'A.k Singh', 'email': 'arvindsingh45057@gmail.com', 'date_of_birth': '1976-07-10'}]}
+    assert response.json() == {'id': 1, 'title': 'Kedarnath, Haridwar, Nainital', 'start_date': '2025-03-20', 'end_date': None, 'created_by': {'id': 1, 'username': 'kartik'}, 'users': [{'id': 1, 'username': 'kartik'}, {'id': 3, 'username': 'suman'}, {'id': 4, 'username': 'A.k Singh'}]}
 
     statement = select(Trip).where(Trip.title == "Kedarnath, Haridwar, Nainital")
     result = test_session.exec(statement).first()
@@ -277,7 +295,7 @@ def test_create_trip_with_user1_as_current_user(client: TestClient, test_session
 
     response = client.post("/trip", json=trip2)
     assert response.status_code == 201
-    assert response.json() == {'id': 2, 'title': 'Rajasthan trip', 'start_date': '2025-05-05', 'end_date': None, 'created_by': {'id': 1, 'full_name': 'kartik singh', 'username': 'kartik', 'email': 'kartiksingh@gmail.com', 'date_of_birth': '2001-04-07'}, 'users': [{'id': 1, 'full_name': 'kartik singh', 'username': 'kartik', 'email': 'kartiksingh@gmail.com', 'date_of_birth': '2001-04-07'}, {'id': 3, 'full_name': 'suman', 'username': 'suman', 'email': 'sumansingh137@gmail.com', 'date_of_birth': '1975-06-11'}]}
+    assert response.json() == {'id': 2, 'title': 'Rajasthan trip', 'start_date': '2025-05-05', 'end_date': None, 'created_by': {'id': 1, 'username': 'kartik'}, 'users': [{'id': 1, 'username': 'kartik'}, {'id': 3, 'username': 'suman'}]}
 
     statement = select(Trip).where(Trip.title == "Rajasthan trip")
     result = test_session.exec(statement).first()
@@ -288,7 +306,7 @@ def test_create_trip_with_user3_as_current_user(client_user3: TestClient, test_s
     trip3 = {
         "title": "Pondicherry trip",
         "start_date": "2025-03-15",
-        "users": [1, 3 ,4]
+        "users": [1]
     }
 
     trip4 = {  
@@ -299,7 +317,7 @@ def test_create_trip_with_user3_as_current_user(client_user3: TestClient, test_s
 
     response = client_user3.post("/trip", json=trip3)
     assert response.status_code == 201
-    assert response.json() == {'id': 3, 'title': 'Pondicherry trip', 'start_date': '2025-03-15', 'end_date': None, 'created_by': {'id': 3, 'full_name': 'suman', 'username': 'suman', 'email': 'sumansingh137@gmail.com', 'date_of_birth': '1975-06-11'}, 'users': [{'id': 1, 'full_name': 'kartik singh', 'username': 'kartik', 'email': 'kartiksingh@gmail.com', 'date_of_birth': '2001-04-07'}, {'id': 3, 'full_name': 'suman', 'username': 'suman', 'email': 'sumansingh137@gmail.com', 'date_of_birth': '1975-06-11'}, {'id': 4, 'full_name': 'arvind', 'username': 'A.k Singh', 'email': 'arvindsingh45057@gmail.com', 'date_of_birth': '1976-07-10'}]}
+    assert response.json() == {'id': 3, 'title': 'Pondicherry trip', 'start_date': '2025-03-15', 'end_date': None, 'created_by': {'id': 3, 'username': 'suman'}, 'users': [{'id': 1, 'username': 'kartik'}]}
 
     statement = select(Trip).where(Trip.title == "Pondicherry trip")
     result = test_session.exec(statement).first()
@@ -308,9 +326,84 @@ def test_create_trip_with_user3_as_current_user(client_user3: TestClient, test_s
 
     response = client_user3.post("/trip", json=trip4)
     assert response.status_code == 201
-    assert response.json() == {'id': 4, 'title': 'Ooty, Nandi hills trip', 'start_date': '2025-04-05', 'end_date': None, 'created_by': {'id': 3, 'full_name': 'suman', 'username': 'suman', 'email': 'sumansingh137@gmail.com', 'date_of_birth': '1975-06-11'}, 'users': [{'id': 3, 'full_name': 'suman', 'username': 'suman', 'email': 'sumansingh137@gmail.com', 'date_of_birth': '1975-06-11'}, {'id': 4, 'full_name': 'arvind', 'username': 'A.k Singh', 'email': 'arvindsingh45057@gmail.com', 'date_of_birth': '1976-07-10'}]}
+    assert response.json() == {'id': 4, 'title': 'Ooty, Nandi hills trip', 'start_date': '2025-04-05', 'end_date': None, 'created_by': {'id': 3, 'username': 'suman'}, 'users': [{'id': 3, 'username': 'suman'}, {'id': 4, 'username': 'A.k Singh'}]}
 
     statement = select(Trip).where(Trip.title == "Ooty, Nandi hills trip")
     result = test_session.exec(statement).first()
     assert result.start_date == datetime(2025, 4, 5, 0, 0).date()
     assert result.created_by_id == 3
+
+def test_get_trips_created_by_user1(client: TestClient):
+    response = client.get("/user/me/trips/created/?offset=0&limit=10")
+    assert response.status_code == 200
+    assert response.json() == [{'id': 1, 'title': 'Kedarnath, Haridwar, Nainital', 'start_date': '2025-03-20', 'end_date': None}, {'id': 2, 'title': 'Rajasthan trip', 'start_date': '2025-05-05', 'end_date': None}]
+
+def test_get_trips_participated_by_user1(client: TestClient):
+    response = client.get("/user/me/trips/participated/?offset=0&limit=10")
+    assert response.status_code == 200
+    assert response.json() == [{'id': 1, 'title': 'Kedarnath, Haridwar, Nainital', 'start_date': '2025-03-20', 'end_date': None}, {'id': 2, 'title': 'Rajasthan trip', 'start_date': '2025-05-05', 'end_date': None}, {'id': 3, 'title': 'Pondicherry trip', 'start_date': '2025-03-15', 'end_date': None}]
+
+def test_get_trips_created_by_user3(client_user3: TestClient):
+    response = client_user3.get("/user/me/trips/created/?offset=0&limit=10")
+    assert response.status_code == 200
+    assert response.json() == [{'id': 3, 'title': 'Pondicherry trip', 'start_date': '2025-03-15', 'end_date': None}, {'id': 4, 'title': 'Ooty, Nandi hills trip', 'start_date': '2025-04-05', 'end_date': None}]
+
+def test_get_trips_participated_by_user3(client_user3: TestClient):
+    response = client_user3.get("/user/me/trips/participated/?offset=0&limit=10")
+    assert response.status_code == 200
+    assert response.json() == [{'id': 1, 'title': 'Kedarnath, Haridwar, Nainital', 'start_date': '2025-03-20', 'end_date': None}, {'id': 2, 'title': 'Rajasthan trip', 'start_date': '2025-05-05', 'end_date': None}, {'id': 4, 'title': 'Ooty, Nandi hills trip', 'start_date': '2025-04-05', 'end_date': None}]
+
+def test_add_traveller_to_a_trip_by_authorized_user(client_user3: TestClient, test_session: Session):
+    response = client_user3.put("/trip/traveller/add/?trip_id=3&user_id=4")
+    assert response.status_code == 200
+    assert response.json() == {'message': 'User added to the trip successfully'}
+
+    statement = select(Trip).where(Trip.id == 3)
+    result = test_session.exec(statement).first()
+    assert any(user.id == 4 for user in result.users)
+
+def test_add_traveller_to_a_trip_by_unauthorized_user(client: TestClient, test_session: Session):
+    response = client.put("/trip/traveller/add/?trip_id=3&user_id=3")
+    assert response.status_code == 401
+    assert response.json() == {'detail': 'Insufficient privileges'}
+
+    statement = select(Trip).where(Trip.id == 3)
+    result = test_session.exec(statement).first()
+    assert not any(user.id == 3 for user in result.users)
+
+def test_remove_traveller_from_the_trip_authorized(client_user3: TestClient, test_session: Session):
+    response = client_user3.delete("/trip/traveller/remove/?trip_id=3&user_id=4")
+    assert response.status_code == 200
+    assert response.json() == {'message': 'User removed from the trip successfully'}
+
+    statement = select(Trip).where(Trip.id == 3)
+    result = test_session.exec(statement).first()
+    assert not any(user.id == 4 for user in result.users)
+
+def test_remove_traveller_from_the_trip_unauthorized(client: TestClient, test_session: Session):
+    response = client.delete("/trip/traveller/remove/?trip_id=3&user_id=1")
+    assert response.status_code == 401
+    assert response.json() == {'detail': 'Insufficient privileges'}
+
+    statement = select(Trip).where(Trip.id == 3)
+    result = test_session.exec(statement).first()
+    assert any(user.id == 1 for user in result.users)
+
+def test_update_trip_title_authorized(client: TestClient, test_session: Session):
+    response = client.put("/trip/update/title/?trip_id=1&title=Kedarnath, Tungnath, Deoriatal")
+    assert response.status_code == 200
+    assert response.json() == {'message': 'Title updated successfully'}
+
+    statement = select(Trip).where(Trip.id == 1)
+    result = test_session.exec(statement).first()
+    assert result.title == "Kedarnath, Tungnath, Deoriatal"
+
+def test_update_trip_title_unauthorized(client_user3: TestClient, test_session: Session):
+    response = client_user3.put("/trip/update/title/?trip_id=1&title=Kedarnath, Tungnath, Deoriatal, Guptkashi")
+    assert response.status_code == 401
+    assert response.json() == {'detail': 'Insufficient privileges'}
+
+    statement = select(Trip).where(Trip.id == 1)
+    result = test_session.exec(statement).first()
+    assert result.title == "Kedarnath, Tungnath, Deoriatal"
+

@@ -27,20 +27,17 @@ def create_trip_in_db(trip: Trip_Create, current_user: User, session: Session):
         session.commit()
         session.refresh(new_trip)
         
-        trip_response = Trip_Read_without_expenses(
+        trip_response = Trip_Read(
             id=new_trip.id,
             title=new_trip.title,
             start_date=new_trip.start_date,
             end_date=new_trip.end_date,
-            created_by=User_Read(
+            created_by=User_Read_id_username(
                 id=new_trip.created_by.id,
-                full_name=new_trip.created_by.full_name,
-                username=new_trip.created_by.username,
-                email=new_trip.created_by.email,
-                date_of_birth=new_trip.created_by.date_of_birth
+                username=new_trip.created_by.username
             ),
             users=[
-                User_Read(id=user.id, full_name=user.full_name, username=user.username, email=user.email, date_of_birth=user.date_of_birth) for user in new_trip.users
+                User_Read_id_username(id=user.id, username=user.username) for user in new_trip.users
             ],
         )
         return trip_response

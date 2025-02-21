@@ -112,6 +112,16 @@ def update_user_full_name_in_db(new_full_name: str, email:EmailStr, session: Ses
     except Exception as e:
         session.rollback()
         raise e
+
+def update_user_username_in_db(new_username: str, email:EmailStr, session: Session):
+    try:
+        statement = update(User).where(User.email == email).values(username = new_username)
+        session.exec(statement)
+        session.commit()
+        return {"message": "username updated successfully"}
+    except Exception as e:
+        session.rollback()
+        raise e
         
 def update_user_date_of_birth_in_db(new_date_of_birth: str, email:EmailStr, session: Session):
     try:

@@ -123,6 +123,15 @@ def update_user_full_name(full_name: str, current_user: User_Read = Depends(get_
         return result
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
+
+@router.put("/user/me/username", status_code=status.HTTP_200_OK)
+def update_user_username(username: str, current_user: User_Read = Depends(get_current_user), session: Session = Depends(get_session)):
+    try:
+        current_user_email = current_user.email
+        result = update_user_username_in_db(username, current_user_email, session)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
     
 @router.put("/user/me/dob", status_code=status.HTTP_200_OK)
 def update_user_date_of_birth(date_of_birth: date, current_user: User_Read = Depends(get_current_user), session: Session = Depends(get_session)):
