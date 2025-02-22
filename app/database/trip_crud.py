@@ -59,8 +59,9 @@ def get_trip_by_id_from_db(trip_id: int, session: Session):
     try:
         statement = select(Trip).where(Trip.id == trip_id).options(selectinload(Trip.created_by))
         result = session.exec(statement).first()
-        users = result.users
-        expenses = result.expenses
+        if result:
+            users = result.users
+            expenses = result.expenses
         return result
     except Exception as e:
         raise e
@@ -297,11 +298,11 @@ def update_trip_startdate_and_enddate_in_db(trip_id: int, trip_start_date: Optio
         query = update(Trip).where(Trip.id == trip_id)
         statement = None
         if trip_start_date and trip_end_date:
-            statement = query.values(start_date=trip_start_date, trip_end_date=trip_end_date)
+            statement = query.values(start_date=trip_start_date, end_date=trip_end_date)
         elif trip_start_date:
             statement = query.values(start_date=trip_start_date)
         else:
-            statement = query.values(trip_end_date=trip_end_date)
+            statement = query.values(end_date=trip_end_date)
 
         if statement is not None:
             result = session.exec(statement)

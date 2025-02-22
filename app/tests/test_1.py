@@ -371,6 +371,21 @@ def test_add_traveller_to_a_trip_by_unauthorized_user(client: TestClient, test_s
     result = test_session.exec(statement).first()
     assert not any(user.id == 3 for user in result.users)
 
+def test_add_traveller_to_a_trip_which_do_not_exists(client_user3: TestClient, test_session: Session):
+    response = client_user3.put("/trip/traveller/add/?trip_id=7&user_id=4")
+    assert response.status_code == 404
+    assert response.json() == {'detail': 'Trip not found'}
+
+def test_add_traveller_which_do_not_exists_to_a_trip(client_user3: TestClient, test_session: Session):
+    response = client_user3.put("/trip/traveller/add/?trip_id=3&user_id=5")
+    assert response.status_code == 404
+    assert response.json() == {'detail': 'User not found'}
+
+def test_add_traveller_to_a_trip_where_traveller_and_trip_both_do_not_exist(client_user3: TestClient, test_session: Session):
+    response = client_user3.put("/trip/traveller/add/?trip_id=7&user_id=5")
+    assert response.status_code == 404
+    assert response.json() == {'detail': 'Trip and User both not found'}
+
 def test_remove_traveller_from_the_trip_authorized(client_user3: TestClient, test_session: Session):
     response = client_user3.delete("/trip/traveller/remove/?trip_id=3&user_id=4")
     assert response.status_code == 200
@@ -388,6 +403,16 @@ def test_remove_traveller_from_the_trip_unauthorized(client: TestClient, test_se
     statement = select(Trip).where(Trip.id == 3)
     result = test_session.exec(statement).first()
     assert any(user.id == 1 for user in result.users)
+
+def test_remove_traveller_from_the_trip_which_do_not_exists(client_user3: TestClient, test_session: Session):
+    response = client_user3.delete("/trip/traveller/remove/?trip_id=7&user_id=4")
+    assert response.status_code == 404
+    assert response.json() == {'detail': 'Trip not found'}
+
+def test_remove_traveller_which_do_not_exits_from_the_trip(client_user3: TestClient, test_session: Session):
+    response = client_user3.delete("/trip/traveller/remove/?trip_id=3&user_id=8")
+    assert response.status_code == 500
+    assert response.json() == {'detail': 'An error occurred: 404: User not found'}
 
 def test_update_trip_title_authorized(client: TestClient, test_session: Session):
     response = client.put("/trip/update/title/?trip_id=1&title=Kedarnath, Tungnath, Deoriatal")
@@ -407,3 +432,27 @@ def test_update_trip_title_unauthorized(client_user3: TestClient, test_session: 
     result = test_session.exec(statement).first()
     assert result.title == "Kedarnath, Tungnath, Deoriatal"
 
+def test_update_title_of_trip_which_do_not_exists(client: TestClient, test_session: Session):
+    response = client.put("/trip/update/title/?trip_id=7&title=Ayodhya Ram Mandir")
+    assert response.status_code == 404
+    assert response.json() == {'detail': 'Trip not found'}
+
+def test_update_trip_dates_authorized(client: TestClient, test_session: Session):
+    statement = select(Trip).where(Trip.id == 1)
+    result = test_session.exec(statement).first()
+    assert result.start_date == datetime(2025, 3, 20, 0, 0).date()
+    assert result.end_date == None
+
+    response = client.put("/trip/update/dates/?trip_id=1&start_date=2025-03-21&end_date=2025-03-23")
+    assert response.status_code == 200
+    assert response.json() == {'message': 'Date updated successfully'}
+
+    statement = select(Trip).where(Trip.id == 1)
+    result = test_session.exec(statement).first()
+    assert result.start_date == datetime(2025, 3, 21, 0, 0).date()
+    assert result.end_date == datetime(2025, 3, 23, 0, 0).date()
+
+def test_update_trip_dates_unauthorized(client: TestClient, test_session: Session):
+    response = client.put("/trip/update/dates/?trip_id=3&start_date=2025-03-21&end_date=2025-03-23")
+    assert response.status_code == 401
+    assert response.json() == {'detail': 'Insufficient privileges'}

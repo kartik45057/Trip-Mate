@@ -104,11 +104,16 @@ def get_filtered_trips_based_on_dates_and_title_for_user(trips_created_by_user_i
 def add_traveller_to_the_trip(trip_id: int, user_id: int, current_user: User_Read = Depends(get_current_user), session: Session = Depends(get_session)):
     try:
         trip = get_trip_by_id_from_db(trip_id, session)
+        user = get_user_by_id_from_db(user_id, session)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
     
-    if not trip:
+    if not trip and not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Trip and User both not found")
+    elif not trip:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Trip not found")
+    elif not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User not found")
 
     if not trip.created_by_id == current_user.id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Insufficient privileges")
@@ -135,7 +140,7 @@ def update_trip_startdate_and_enddate(trip_id: int, start_date: Optional[date] =
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Insufficient privileges")
 
     try:
-        result = update_trip_startdate_and_enddate_in_db(trip_id, start_date, end_date)
+        result = update_trip_startdate_and_enddate_in_db(trip_id, start_date, end_date, session)
         return result
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
@@ -146,7 +151,7 @@ def update_trip_title(trip_id: int, title: str, current_user: User_Read = Depend
         trip = get_trip_by_id_from_db(trip_id, session)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
-    
+
     if not trip:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Trip not found")
 
@@ -177,7 +182,7 @@ def remove_traveller_from_the_trip(trip_id: int, user_id: int, current_user: Use
         trip = get_trip_by_id_from_db(trip_id, session)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
-    
+
     if not trip:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Trip not found")
 
