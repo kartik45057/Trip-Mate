@@ -61,7 +61,7 @@ def get_filtered_trips_based_on_dates_and_title_for_user(trips_created_by_user_i
 
     try:
         if start_after and start_before and end_after and end_before:
-            result = get_user_trips_starting_within_daterange_and_ending_within_daterange(trips_created_by_user_id, start_after, start_before, end_after, end_before, session)
+            result = get_user_trips_starting_within_daterange_and_ending_within_daterange(trips_created_by_user_id, start_after, start_before, end_after, end_before, title, session)
         elif start_after and start_before and end_after:
             result = get_user_trips_starting_within_daterange_and_ending_after_specified_date(trips_created_by_user_id, start_after, start_before, end_after, title, session)
         elif start_after and start_before and end_before:

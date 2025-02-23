@@ -90,7 +90,7 @@ def get_user_trips_starting_after_specified_date(user_id: int, start_after: date
         
 def get_user_trips_starting_before_specified_date(user_id: int, start_before: date, title: str, session: Session):
     try:
-        statement = statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date < start_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
+        statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date < start_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
         for item in result:
             travellers = item.users
@@ -101,7 +101,7 @@ def get_user_trips_starting_before_specified_date(user_id: int, start_before: da
         
 def get_user_trips_ending_after_specified_date(user_id: int, end_after: date, title:str, session: Session):
     try:
-        statement = statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.end_date > end_after, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
+        statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.end_date > end_after, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
         for item in result:
             travellers = item.users
@@ -112,7 +112,7 @@ def get_user_trips_ending_after_specified_date(user_id: int, end_after: date, ti
 
 def get_user_trips_ending_before_specified_date(user_id: int, end_before: date, title: str, session: Session):
     try:
-        statement = statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.end_date < end_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
+        statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.end_date < end_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
         for item in result:
             travellers = item.users
@@ -123,7 +123,7 @@ def get_user_trips_ending_before_specified_date(user_id: int, end_before: date, 
         
 def get_user_trips_starting_between_specified_dates(user_id: int, start_after: date, start_before: date, title: str, session: Session):
     try:
-        statement = statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date > start_after, Trip.start_date < start_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
+        statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date > start_after, Trip.start_date < start_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
         for item in result:
             travellers = item.users
@@ -134,7 +134,7 @@ def get_user_trips_starting_between_specified_dates(user_id: int, start_after: d
 
 def get_user_trips_ending_between_specified_dates(user_id: int, end_after: date, end_before:date, title: str, session: Session):
     try:
-        statement = statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.end_date > end_after, Trip.end_date < end_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
+        statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.end_date > end_after, Trip.end_date < end_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
         for item in result:
             travellers = item.users
@@ -145,7 +145,7 @@ def get_user_trips_ending_between_specified_dates(user_id: int, end_after: date,
         
 def get_user_trips_starting_and_ending_within_specified_daterange(user_id: int, start_after: date, end_before: date, title: str, session: Session):
     try:
-        statement = statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date > start_after, Trip.end_date < end_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
+        statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date > start_after, Trip.end_date < end_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
         for item in result:
             travellers = item.users
@@ -156,7 +156,7 @@ def get_user_trips_starting_and_ending_within_specified_daterange(user_id: int, 
         
 def get_user_trips_starting_after_and_ending_after_specified_dates(user_id: int, start_after: date, end_after: date, title: str, session: Session):
     try:
-        statement = statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date > start_after, Trip.end_date > end_after, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
+        statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date > start_after, Trip.end_date > end_after, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
         for item in result:
             travellers = item.users
@@ -167,7 +167,7 @@ def get_user_trips_starting_after_and_ending_after_specified_dates(user_id: int,
         
 def get_user_trips_starting_before_and_ending_after_specified_dates(user_id: int, start_before: date, end_after: date, title: str, session: Session):
     try:
-        statement = statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date < start_before, Trip.end_date > end_after, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
+        statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date < start_before, Trip.end_date > end_after, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
         for item in result:
             travellers = item.users
@@ -178,7 +178,7 @@ def get_user_trips_starting_before_and_ending_after_specified_dates(user_id: int
                
 def get_user_trips_starting_before_and_ending_before_specified_dates(user_id: int, start_before: date, end_before: date, title: str, session: Session):
     try:
-        statement = statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date < start_before, Trip.end_date < end_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
+        statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date < start_before, Trip.end_date < end_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
         for item in result:
             travellers = item.users
@@ -189,7 +189,7 @@ def get_user_trips_starting_before_and_ending_before_specified_dates(user_id: in
         
 def get_user_trips_starting_within_daterange_and_ending_after_specified_date(user_id: int, start_after: date, start_before: date, end_after: date, title: str, session: Session):
     try:
-        statement = statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date > start_after, Trip.start_date < start_before, Trip.end_date > end_after, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
+        statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date > start_after, Trip.start_date < start_before, Trip.end_date > end_after, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
         for item in result:
             travellers = item.users
@@ -200,7 +200,7 @@ def get_user_trips_starting_within_daterange_and_ending_after_specified_date(use
         
 def get_user_trips_starting_within_daterange_and_ending_before_specified_date(user_id: int, start_after: date, start_before: date, end_before: date, title: str, session: Session):
     try:
-        statement = statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date > start_after, Trip.start_date < start_before, Trip.end_date < end_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
+        statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date > start_after, Trip.start_date < start_before, Trip.end_date < end_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
         for item in result:
             travellers = item.users
@@ -209,9 +209,9 @@ def get_user_trips_starting_within_daterange_and_ending_before_specified_date(us
     except Exception as e:
         raise e
   
-def get_user_trips_ending_within_daterange_and_starting_after_specified_date(user_id: int, start_after: date, end_before: date, end_after: date, title: str, session: Session):
+def get_user_trips_ending_within_daterange_and_starting_after_specified_date(user_id: int, start_after: date, end_after: date, end_before: date, title: str, session: Session):
     try:
-        statement = statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date > start_after, Trip.end_date > end_after, Trip.end_date < end_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
+        statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date > start_after, Trip.end_date > end_after, Trip.end_date < end_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
         for item in result:
             travellers = item.users
@@ -222,7 +222,7 @@ def get_user_trips_ending_within_daterange_and_starting_after_specified_date(use
   
 def get_user_trips_ending_within_daterange_and_starting_before_specified_date(user_id: int, start_before: date, end_before: date, end_after: date, title: str, session: Session):
     try:
-        statement = statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date < start_before, Trip.end_date > end_after, Trip.end_date < end_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
+        statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date < start_before, Trip.end_date > end_after, Trip.end_date < end_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
         for item in result:
             travellers = item.users
@@ -233,7 +233,7 @@ def get_user_trips_ending_within_daterange_and_starting_before_specified_date(us
   
 def get_user_trips_starting_within_daterange_and_ending_within_daterange(user_id: int, start_after: date, start_before: date, end_before: date, end_after: date, title: str, session: Session):
     try:
-        statement = statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date > start_after, Trip.start_date < start_before, Trip.end_date > end_after, Trip.end_date < end_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
+        statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date > start_after, Trip.start_date < start_before, Trip.end_date > end_after, Trip.end_date < end_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
         for item in result:
             travellers = item.users
