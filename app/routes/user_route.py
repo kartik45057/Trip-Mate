@@ -47,7 +47,7 @@ def get_all_users(offset: int = Query(ge=0), limit: int = Query(ge=0), current_u
         result = get_all_users_from_db(offset, limit, session)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
-    
+
     if not result:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
     return result
@@ -59,10 +59,10 @@ def get_current_user(current_user: User_Read = Depends(get_current_user), sessio
         result = get_user_by_email(current_user_email, session)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
-    
+
     if not result:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    
+
     return result
 
 @router.get("/user/me/trips/created", status_code=status.HTTP_200_OK, response_model=List[Trip_Read_basic])
@@ -72,10 +72,10 @@ def get_trips_created_by_user(offset: int = Query(ge=0), limit: int = Query(ge=0
         result = get_trips_created_by_user_from_db(offset, limit, current_user_email, session)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
-    
+
     if not result:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
-    
+
     return result
 
 @router.get("/user/me/trips/participated", status_code=status.HTTP_200_OK, response_model=List[Trip_Read_basic])
@@ -85,10 +85,10 @@ def get_trips_participated_by_user(offset: int = Query(ge=0), limit: int = Query
         result = get_trips_participated_by_user_from_db(offset, limit, current_user_email, session)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
-    
+
     if not result:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
-    
+
     return result
 
 @router.get("/users/me/payments", status_code=status.HTTP_200_OK, response_model=List[Payment_Read_without_user])
@@ -98,7 +98,7 @@ def get_payments_done_by_user(offset: int = Query(ge=0), limit: int = Query(ge=0
         result = get_payments_done_by_user_from_db(offset, limit, current_user_email, session)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
-    
+
     if not result:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
     
@@ -132,7 +132,7 @@ def update_user_username(username: str, current_user: User_Read = Depends(get_cu
         return result
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
-    
+
 @router.put("/user/me/dob", status_code=status.HTTP_200_OK)
 def update_user_date_of_birth(date_of_birth: date, current_user: User_Read = Depends(get_current_user), session: Session = Depends(get_session)):
     try:

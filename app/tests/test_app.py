@@ -508,6 +508,11 @@ def test_get_trips_starting_after_date(client: TestClient):
     assert response.status_code == 200
     assert response.json() == [{'id': 1, 'title': 'Kedarnath, Tungnath, Deoriatal', 'start_date': '2025-03-20', 'end_date': '2025-03-25', 'created_by': {'id': 1, 'username': 'kartik'}, 'users': [{'id': 1, 'username': 'kartik'}, {'id': 3, 'username': 'suman'}, {'id': 4, 'username': 'A.k Singh'}]}, {'id': 2, 'title': 'Rajasthan trip', 'start_date': '2025-05-05', 'end_date': None, 'created_by': {'id': 1, 'username': 'kartik'}, 'users': [{'id': 1, 'username': 'kartik'}, {'id': 3, 'username': 'suman'}]}]
 
+def test_get_trips_starting_after_date_with_title(client: TestClient):
+    response = client.get("/trip/?start_after=2024-01-01&title=Somnath/Dwark")
+    assert response.status_code == 200
+    assert response.json() == [{'id': 6, 'title': 'Somnath/Dwarka', 'start_date': '2024-12-25', 'end_date': '2024-12-27', 'created_by': {'id': 1, 'username': 'kartik'}, 'users': [{'id': 1, 'username': 'kartik'}, {'id': 3, 'username': 'suman'}]}]
+
 def test_get_trips_starting_before_date(client: TestClient):
     response = client.get("/trip/?start_before=2025-01-01")
     assert response.status_code == 200
@@ -552,4 +557,27 @@ def test_get_user_trips_ending_within_daterange_and_starting_after_specified_dat
     response = client.get("/trip/?start_after=2024-01-01&end_after=2024-04-01&end_before=2024-12-27")
     assert response.status_code == 200
     assert response.json() == [{'id': 5, 'title': 'Mahakal Ujjain', 'start_date': '2024-11-17', 'end_date': '2024-11-18', 'created_by': {'id': 1, 'username': 'kartik'}, 'users': [{'id': 1, 'username': 'kartik'}, {'id': 3, 'username': 'suman'}, {'id': 4, 'username': 'A.k Singh'}]}]
+
+def test_get_user_trips_ending_within_daterange_and_starting_before_specified_date(client: TestClient):
+    response = client.get("/trip/?start_before=2025-01-01&end_after=2024-12-01&end_before=2025-12-27")
+    assert response.status_code == 200
+    assert response.json() == [{'id': 6, 'title': 'Somnath/Dwarka', 'start_date': '2024-12-25', 'end_date': '2024-12-27', 'created_by': {'id': 1, 'username': 'kartik'}, 'users': [{'id': 1, 'username': 'kartik'}, {'id': 3, 'username': 'suman'}]}]
+
+def test_get_user_trips_starting_within_daterange_and_ending_within_daterange(client: TestClient):
+    response = client.get("/trip/?start_after=2024-01-01&start_before=2025-04-01&end_after=2024-12-01&end_before=2024-03-23")
+    assert response.status_code == 200
+    assert response.json() == [{'id': 5, 'title': 'Mahakal Ujjain', 'start_date': '2024-11-17', 'end_date': '2024-11-18', 'created_by': {'id': 1, 'username': 'kartik'}, 'users': [{'id': 1, 'username': 'kartik'}, {'id': 3, 'username': 'suman'}, {'id': 4, 'username': 'A.k Singh'}]}]
+
+def test_delete_trip(client: TestClient, test_session: Session):
+    statement = select(Trip).where(Trip.id == 6)
+    result= test_session.exec(statement).first()
+    assert result.title == 'Somnath/Dwarka'
+
+    response = client.delete("/trip/remove/?trip_id=6")
+    assert response.status_code == 200
+    assert response.json() == {'message': 'Trip deleted successfully'}
+
+    statement = select(Trip).where(Trip.id == 6)
+    result= test_session.exec(statement).first()
+    assert result == None
 

@@ -1,5 +1,4 @@
 from sqlite3 import IntegrityError
-
 from fastapi import HTTPException, status
 from app.database.db_main import engine
 from sqlmodel import Session, select, update
@@ -17,7 +16,7 @@ def create_user(user: User_Create, hashed_password: str, session: Session):
     except Exception as e:
         session.rollback()
         raise e
-    
+
 def get_user_by_email(email: EmailStr, session: Session):
     try:
         statement = select(User).where(User.email == email)
@@ -41,7 +40,7 @@ def get_user_by_id_from_db(user_id: int, session: Session):
         return result
     except Exception as e:
         raise e
-        
+
 def get_user_by_ids_from_db(user_ids: List[int], session: Session):
     try:
         statement = select(User).where(User.id.in_(user_ids))
@@ -122,7 +121,7 @@ def update_user_username_in_db(new_username: str, email:EmailStr, session: Sessi
     except Exception as e:
         session.rollback()
         raise e
-        
+
 def update_user_date_of_birth_in_db(new_date_of_birth: str, email:EmailStr, session: Session):
     try:
         statement = update(User).where(User.email == email).values(date_of_birth = new_date_of_birth)
@@ -132,7 +131,7 @@ def update_user_date_of_birth_in_db(new_date_of_birth: str, email:EmailStr, sess
     except Exception as e:
         session.rollback()
         raise e
-        
+
 def update_user_password_in_db(new_password: str, email:EmailStr, session: Session):
     try:
         statement = update(User).where(User.email == email).values(password = new_password)
