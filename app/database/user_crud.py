@@ -1,4 +1,5 @@
 from sqlite3 import IntegrityError
+from fastapi import HTTPException, status
 from app.database.db_main import engine
 from sqlmodel import Session, select, update
 from app.models import *
@@ -7,15 +8,15 @@ from sqlalchemy.orm import selectinload
 
 def create_user(user: User_Create, hashed_password: str, session: Session):
     try:
-        new_user = User(name=user.name, email=user.email, password=hashed_password, date_of_birth=user.date_of_birth)
+        new_user = User(full_name=user.full_name, username=user.username, email=user.email, password=hashed_password, date_of_birth=user.date_of_birth)
         session.add(new_user)
         session.commit()
         session.refresh(new_user)
         return new_user
-    except IntegrityError as e:
+    except Exception as e:
         session.rollback()
         raise e
-    
+
 def get_user_by_email(email: EmailStr, session: Session):
     try:
         statement = select(User).where(User.email == email)
@@ -26,7 +27,7 @@ def get_user_by_email(email: EmailStr, session: Session):
 
 def get_all_users_from_db(offset: int, limit: int, session: Session):
     try:
-        statement = select(User).order_by(User.name).offset(offset).limit(limit)
+        statement = select(User).order_by(User.username).offset(offset).limit(limit)
         result = session.exec(statement).all()
         return result
     except Exception as e:
@@ -39,7 +40,7 @@ def get_user_by_id_from_db(user_id: int, session: Session):
         return result
     except Exception as e:
         raise e
-        
+
 def get_user_by_ids_from_db(user_ids: List[int], session: Session):
     try:
         statement = select(User).where(User.id.in_(user_ids))
@@ -101,16 +102,26 @@ def get_payments_done_by_user_from_db(offset: int, limit: int, email: EmailStr, 
     except Exception as e:
         raise e
 
-def update_user_name_in_db(new_name: str, email:EmailStr, session: Session):
+def update_user_full_name_in_db(new_full_name: str, email:EmailStr, session: Session):
     try:
-        statement = update(User).where(User.email == email).values(name = new_name)
+        statement = update(User).where(User.email == email).values(full_name = new_full_name)
         session.exec(statement)
         session.commit()
-        return {"message": "name updated successfully"}
+        return {"message": "User's full name updated successfully"}
     except Exception as e:
         session.rollback()
         raise e
-        
+
+def update_user_username_in_db(new_username: str, email:EmailStr, session: Session):
+    try:
+        statement = update(User).where(User.email == email).values(username = new_username)
+        session.exec(statement)
+        session.commit()
+        return {"message": "username updated successfully"}
+    except Exception as e:
+        session.rollback()
+        raise e
+
 def update_user_date_of_birth_in_db(new_date_of_birth: str, email:EmailStr, session: Session):
     try:
         statement = update(User).where(User.email == email).values(date_of_birth = new_date_of_birth)
@@ -120,7 +131,7 @@ def update_user_date_of_birth_in_db(new_date_of_birth: str, email:EmailStr, sess
     except Exception as e:
         session.rollback()
         raise e
-        
+
 def update_user_password_in_db(new_password: str, email:EmailStr, session: Session):
     try:
         statement = update(User).where(User.email == email).values(password = new_password)

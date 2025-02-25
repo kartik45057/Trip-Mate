@@ -25,11 +25,11 @@ def get_all_expenses_for_the_trip(trip_id: int, current_user: User_Read = Depend
         trip = get_trip_by_id_from_db(trip_id, session)
         if not trip.created_by_id == current_user.id:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Insufficient privileges")
-        
+
         result = get_all_expenses_for_the_trip_from_db(trip_id, session)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
-    
+
     if not result:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Item not Found")
     return result
@@ -40,7 +40,7 @@ def get_expense_by_id(expense_id: int, session: Session = Depends(get_session)):
         result = get_expense_details_from_db(expense_id, session)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
-    
+
     if not result:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Item not Found")
     return result

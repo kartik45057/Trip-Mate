@@ -5,11 +5,12 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 from app.enums import CurrencyCode, PaymentMode
 
 class User_Create(BaseModel):
-    name: str = Field(min_length=2, max_length=50, description="User's name")
+    full_name: str = Field(min_length=2, max_length=50, description="User's full name")
+    username: str = Field(min_length=3, max_length=15, description="Unique name for user")
     email: EmailStr = Field(description="User's Email id")
     password: str
     date_of_birth: date = Field(description="User's date of birth")
-    
+
     @field_validator("password")
     def validate_password(cls, password):
         try:
@@ -38,9 +39,14 @@ class User_Create(BaseModel):
 
 class User_Read(BaseModel):
     id: int = Field(description="Unique identifier for the user")
-    name: str = Field(min_length=2, max_length=50, description="User's name")
+    full_name: str = Field(min_length=2, max_length=50, description="User's full name")
+    username: str = Field(min_length=2, max_length=50, description="Unique name for user")
     email: EmailStr = Field(description="User's Email id")
     date_of_birth: date = Field(description="User's date of birth")
+
+class User_Read_id_username(BaseModel):
+    id: int = Field(description="Unique identifier for the user")
+    username: str = Field(min_length=2, max_length=50, description="Unique name for user")
 
 class Payment_Create(BaseModel):
     currency: CurrencyCode = Field(description="The currency of the payment (allowed values: INR, USD, EUR)")
@@ -105,17 +111,17 @@ class Trip_Read(BaseModel):
     title: str = Field(min_length=3, max_length=50, description="Title of the trip")
     start_date: date = Field(description="Start date of the trip")
     end_date: Optional[date] = Field(default=None, description="End date of the trip")
-    created_by: User_Read
-    users: Optional[List[User_Read]] = Field(default=[], description="List of users who are part of the trip")
-    expenses: Optional[List[Expense_Read]] = Field(default=[], description="List of expenses that incurred during the trip")
+    created_by: User_Read_id_username
+    users: Optional[List[User_Read_id_username]] = Field(default=[], description="List of users who are part of the trip")
 
-class Trip_Read_without_expenses(BaseModel):
+class Trip_Read2(BaseModel):
     id: int = Field(description="Unique identifier for the trip")
     title: str = Field(min_length=3, max_length=50, description="Title of the trip")
     start_date: date = Field(description="Start date of the trip")
     end_date: Optional[date] = Field(default=None, description="End date of the trip")
     created_by: User_Read
     users: Optional[List[User_Read]] = Field(default=[], description="List of users who are part of the trip")
+    expenses: Optional[List[Expense_Read]] = Field(default=[], description="List of expenses that incurred during the trip")
 
 class Trip_Read_basic(BaseModel):
     id: int = Field(description="Unique identifier for the trip")
