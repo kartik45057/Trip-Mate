@@ -55,16 +55,28 @@ class Payment_Create(BaseModel):
     payment_date: datetime = Field(default=None, description="Date and time of the payment")
     notes: Optional[str] = Field(default=None, max_length=100 ,description="Any notes related to the payment")
     user_id: int = Field(description="user id of user who has done the payment")
-    expense_id: int = Field(description="Expense id the payment is part of")
 
 class Payment_Read(BaseModel):
     id: int = Field(description="Unique identifier for the payment")
     currency: CurrencyCode = Field(description="The currency of the payment (allowed values: INR, USD, EUR)")
     amount: float = Field(description="The amount of the payment in the specified currency")
     payment_mode: PaymentMode = Field(description="The mode of the payment (allowed values: Cash, Credit Card, Debit Card, UPI etc)")
-    user: User_Read = Field(description="user who has done the payment")
+    user: User_Read_id_username = Field(description="user who has done the payment")
     payment_date: datetime = Field(default=None, description="Date and time of the payment")
     notes: Optional[str] = Field(default=None, max_length=100 ,description="Any notes related to the payment")
+
+class Payment_Read2(BaseModel):
+    id: int = Field(description="Unique identifier for the payment")
+    currency: CurrencyCode = Field(description="The currency of the payment (allowed values: INR, USD, EUR)")
+    amount: float = Field(description="The amount of the payment in the specified currency")
+    payment_mode: PaymentMode = Field(description="The mode of the payment (allowed values: Cash, Credit Card, Debit Card, UPI etc)")
+    user: User_Read_id_username = Field(description="user who has done the payment")
+
+class Payment_Read_basic(BaseModel):
+    id: int = Field(description="Unique identifier for the payment")
+    currency: CurrencyCode = Field(description="The currency of the payment (allowed values: INR, USD, EUR)")
+    amount: float = Field(description="The amount of the payment in the specified currency")
+    payment_mode: PaymentMode = Field(description="The mode of the payment (allowed values: Cash, Credit Card, Debit Card, UPI etc)")
 
 class Payment_Read_without_user(BaseModel):
     id: int = Field(description="Unique identifier for the payment")
@@ -90,8 +102,14 @@ class Expense_Read(BaseModel):
     id: int = Field(description="Unique identifier for the expense")
     description: Optional[str] = Field(default=None, min_length=10, max_length=100, description="Details of expense, eg: 2000 rupees spend for dinner at cafe")
     trip_id: int = Field(description="id of the trip this expense is part of")
-    users: List[User_Read] = Field(description="List of users between whom amount needs to be splitted")
-    payments: List[Payment_Read] = Field(description="Payments done as a part of this expense")
+    users: List[User_Read_id_username] = Field(description="List of users between whom amount needs to be splitted")
+    payments: List[Payment_Read2] = Field(description="Payments done as a part of this expense")
+
+class Expense_Read2(BaseModel):
+    id: int = Field(description="Unique identifier for the expense")
+    description: Optional[str] = Field(default=None, min_length=10, max_length=100, description="Details of expense, eg: 2000 rupees spend for dinner at cafe")
+    trip_id: int = Field(description="id of the trip this expense is part of")
+    payments: List[Payment_Read_basic] = Field(description="Payments done as a part of this expense")
 
 class Expense_Split_Exp(BaseModel):
     id: int = Field(description="Unique identifier for the expense")

@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi.security import OAuth2PasswordBearer
 from app.database.db_main import create_db_and_tables, close_db_connections
-from app.routes import expense_route, trip_route, user_route, root_route
+from app.routes import expense_route, payment_route, trip_route, user_route, root_route
 from fastapi import FastAPI
 from app.models import *
 
@@ -23,6 +23,7 @@ app.include_router(root_route.router)
 app.include_router(user_route.router)
 app.include_router(trip_route.router)
 app.include_router(expense_route.router)
+app.include_router(payment_route.router)
 
 
     
