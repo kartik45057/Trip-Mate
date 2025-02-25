@@ -1,5 +1,5 @@
-from sqlmodel import Session, select
-from app.database.db_models import Expense, Payment, Trip, User
+from sqlmodel import Session, select, update
+from app.database.db_models import Expense, Payment, Trip, User, UserExpenseLink
 from app.database.payment_crud import get_payment_by_ids_from_db
 from app.models import Expense_Create
 from app.database.db_main import engine
@@ -16,10 +16,10 @@ def create_expense_in_db(expense: Expense_Create, current_user: User, session: S
         payments = expense.payments
         if payments:
             for payment in payments:
-                new_payment = Payment(currency=payment.currency, amount=payment.amount, payment_mode=payment.payment_mode, user_id=payment.user_id)
+                new_payment = Payment(currency=payment.currency, amount=payment.amount, payment_mode=payment.payment_mode, payment_date=payment.payment_date, user_id=payment.user_id)
                 expense_payments.append(new_payment)
 
-        new_expense = Expense(description=expense.description, amount=expense.amount, trip_id=expense.trip_id, payments=expense_payments, users=split_between_users)
+        new_expense = Expense(description=expense.description, trip_id=expense.trip_id, payments=expense_payments, users=split_between_users)
         session.add(new_expense)
         session.commit()
         session.refresh(new_expense)
@@ -46,10 +46,41 @@ def get_expense_details_from_db(expense_id: int, session: Session):
     try:
         statement = select(Expense).where(Expense.id == expense_id).options(selectinload(Expense.users))
         result = session.exec(statement).first()
-        payments = result.payments
-        for payment in payments:
-            user = payment.user
+        if result:
+            payments = result.payments
+            for payment in payments:
+                user = payment.user
 
         return result
     except Exception as e:
         raise e
+    
+def update_expense_description_in_db(expense_id, new_description, session):
+    try:
+        statement = update(Expense).where(Expense.id == expense_id).values(description = new_description)
+        result = session.exec(statement)
+        session.commit()
+        return {"message": "Description updated successfully"}
+    except Exception as e:
+        session.rollback()
+        raise e
+    
+def delete_expense_in_db(expense_id, session):
+    try:
+        statement = select(Expense).where(Expense.id == expense_id)
+        expense = session.exec(statement).first()
+        if expense:
+            payment_ids = [payment.id for payment in expense.payments] if expense.payments else []
+            statement = select(Payment).where(Payment.id.in_(payment_ids))
+            payments = session.exec(statement).all()
+
+            session.delete(expense)
+            for payment in payments:
+                session.delete(payment)
+
+            session.commit()
+        return {"message": "Expense deleted successfully"}
+    except Exception as e:
+        session.rollback()
+        raise e
+
