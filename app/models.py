@@ -55,6 +55,7 @@ class Payment_Create(BaseModel):
     payment_date: datetime = Field(default=None, description="Date and time of the payment")
     notes: Optional[str] = Field(default=None, max_length=100 ,description="Any notes related to the payment")
     user_id: int = Field(description="user id of user who has done the payment")
+    expense_id: int
 
 class Payment_Read(BaseModel):
     id: int = Field(description="Unique identifier for the payment")
@@ -115,7 +116,7 @@ class Expense_Split_Exp(BaseModel):
     id: int = Field(description="Unique identifier for the expense")
     trip_id: int = Field(description="id of the trip this expense is part of")
     description: Optional[str] = Field(default=None, min_length=10, max_length=100, description="Details of expense, eg: 2000 rupees spend for dinner at cafe")
-    users: List[User_Read] = Field(description="List of users between whom amount needs to be splitted")
+    users: List[User_Read_id_username] = Field(description="List of users between whom amount needs to be splitted")
     payments: List[Payment_Split_Exp] = Field(description="Payments done as a part of this expense")
 
 class Trip_Create(BaseModel):

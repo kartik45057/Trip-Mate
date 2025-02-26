@@ -1,3 +1,4 @@
+from typing import List
 from sqlmodel import Session, select, update
 from app.database.db_models import Expense, Payment, Trip, User, UserExpenseLink
 from app.database.payment_crud import get_payment_by_ids_from_db
@@ -50,6 +51,21 @@ def get_expense_details_from_db(expense_id: int, session: Session):
             payments = result.payments
             for payment in payments:
                 user = payment.user
+
+        return result
+    except Exception as e:
+        raise e
+    
+def get_all_expenses_by_ids(expense_ids: List[int], session: Session):
+    try:
+        statement = select(Expense).where(Expense.id.in_(expense_ids)).options(selectinload(Expense.users))
+        result = session.exec(statement).all()
+        if result:
+            for expense in result:
+                payments = expense.payments
+                if payments:
+                    for payment in payments:
+                        user = payment.user
 
         return result
     except Exception as e:

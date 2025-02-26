@@ -1,10 +1,21 @@
 from typing import List
 from sqlmodel import Session, select, update
 from app.database.db_models import Expense, Payment, Trip, User
-from app.models import Expense_Create
+from app.models import Expense_Create, Payment_Create
 from app.database.db_main import engine
 from sqlalchemy.orm import selectinload
-        
+
+def create_payment_in_db(payment: Payment_Create, session: Session):
+    try:
+        new_payment = Payment(currency=payment.currency, amount=payment.amount, payment_mode=payment.payment_mode, payment_date=payment.payment_date, notes=payment.notes, user_id=payment.user_id, expense_id=payment.expense_id)
+        session.add(new_payment)
+        session.commit()
+        session.refresh(new_payment)
+        return new_payment
+    except Exception as e:
+        session.rollback()
+        raise e
+
 def get_payment_by_id_from_db(payment_id: int, session: Session):
     try:
         statement = select(Payment).where(Payment.id == payment_id).options(selectinload(Payment.expense))
@@ -58,6 +69,20 @@ def update_payment_details_in_db(payment_id, currency, amount, payment_mode, use
         session.exec(statement)
         session.commit()
         return {"message": "details updated successfully"}
+    except Exception as e:
+        session.rollback()
+        raise e
+
+def delete_payment_from_db(payment_id: int, session: Session):
+    try:
+        statement = select(Payment).where(Payment.id == payment_id)
+        result = session.exec(statement).first()
+        if result:
+            session.delete(result)
+            session.commit()
+            return {"message": "Payment deleted successfully"}
+        
+        return None
     except Exception as e:
         session.rollback()
         raise e

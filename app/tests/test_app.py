@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 import pytest
 from sqlmodel import SQLModel, Session, create_engine, select
 from app.database.db_models import Expense, Payment, Trip, User, UserExpenseLink
+from app.enums import PaymentMode
 from app.main import app
 from app.database.db_main import get_session
 from app.util.auth import get_current_user
@@ -676,7 +677,6 @@ def test_delete_expense(client: TestClient, test_session: Session):
     result = test_session.exec(statement).all()
     assert len(result) == 3
 
-
     response = client.delete("/expense/?expense_id=1")
     assert response.status_code == 200
     assert response.json() == {"message": "Expense deleted successfully"}
@@ -693,7 +693,7 @@ def test_delete_expense(client: TestClient, test_session: Session):
     result = test_session.exec(statement).all()
     assert len(result) == 0
 
-def test_get_payment_details_by_id(client: TestClient, test_session: Session):
+def test_get_payment_details_by_id(client: TestClient):
     response = client.get("/payment/2")
     assert response.status_code == 200
     assert response.json() == {'id': 2, 'currency': 'INR', 'amount': 350.0, 'payment_mode': 'Cash', 'user': {'id': 1, 'username': 'kartik'}, 'payment_date': '2025-03-21T20:00:00', 'notes': None}
@@ -701,3 +701,83 @@ def test_get_payment_details_by_id(client: TestClient, test_session: Session):
     response = client.get("/payment/1")
     assert response.status_code == 404
     assert response.json() == {'detail': 'Item not Found'}
+
+def test_update_payment_details(client: TestClient, test_session: Session):
+    statement = select(Payment).where(Payment.id == 2)
+    result = test_session.exec(statement).first()
+    assert result.amount == 350.0
+
+    response = client.put("/payment/?payment_id=2&amount=351")
+    assert response.status_code == 200
+    assert response.json() == {'message': 'details updated successfully'}
+
+    statement = select(Payment).where(Payment.id == 2)
+    result = test_session.exec(statement).first()
+    assert result.amount == 351.0
+
+    statement = select(Payment).where(Payment.id == 2)
+    result = test_session.exec(statement).first()
+    assert result.payment_mode == PaymentMode.CASH
+
+    response = client.put("/payment/?payment_id=2&amount=350&payment_mode=UPI")
+    assert response.status_code == 200
+    assert response.json() == {'message': 'details updated successfully'}
+
+    statement = select(Payment).where(Payment.id == 2)
+    result = test_session.exec(statement).first()
+    assert result.amount == 350.0
+
+    statement = select(Payment).where(Payment.id == 2)
+    result = test_session.exec(statement).first()
+    assert result.payment_mode == PaymentMode.UPI
+
+def test_create_payment(client: TestClient, test_session: Session):
+    payment = {
+        'id': 2,
+        'currency': 'INR',
+        'amount': 150.0, 
+        'payment_mode': 'Cash',
+        'payment_date': '2025-03-21T20:01:00Z',
+        'user_id': 4,
+        'expense_id': 2
+        }
+    
+    response = client.get("/expense/2")
+    assert response.status_code == 200
+    assert response.json() == {'id': 2, 'description': 'Dinner day 1', 'trip_id': 1, 'users': [{'id': 1, 'username': 'kartik'}, {'id': 3, 'username': 'suman'}, {'id': 4, 'username': 'A.k Singh'}], 'payments': [{'id': 2, 'currency': 'INR', 'amount': 350.0, 'payment_mode': 'UPI', 'user': {'id': 1, 'username': 'kartik'}}, {'id': 3, 'currency': 'INR', 'amount': 200.0, 'payment_mode': 'UPI', 'user': {'id': 3, 'username': 'suman'}}]}
+
+    response = client.post("/payment", json=payment)
+    assert response.status_code == 201
+    assert response.json() == {'id': 4, 'currency': 'INR', 'amount': 150.0, 'payment_mode': 'Cash', 'user': {'id': 4, 'username': 'A.k Singh'}, 'payment_date': '2025-03-21T20:01:00', 'notes': None}
+
+    response = client.get("/payment/4")
+    assert response.status_code == 200
+    assert response.json() == {'id': 4, 'currency': 'INR', 'amount': 150.0, 'payment_mode': 'Cash', 'user': {'id': 4, 'username': 'A.k Singh'}, 'payment_date': '2025-03-21T20:01:00', 'notes': None}
+
+    response = client.get("/expense/2")
+    assert response.status_code == 200
+    assert response.json() == {'id': 2, 'description': 'Dinner day 1', 'trip_id': 1, 'users': [{'id': 1, 'username': 'kartik'}, {'id': 3, 'username': 'suman'}, {'id': 4, 'username': 'A.k Singh'}], 'payments': [{'id': 2, 'currency': 'INR', 'amount': 350.0, 'payment_mode': 'UPI', 'user': {'id': 1, 'username': 'kartik'}}, {'id': 3, 'currency': 'INR', 'amount': 200.0, 'payment_mode': 'UPI', 'user': {'id': 3, 'username': 'suman'}}, {'id': 4, 'currency': 'INR', 'amount': 150.0, 'payment_mode': 'Cash', 'user': {'id': 4, 'username': 'A.k Singh'}}]}
+
+def test_delete_payment(client: TestClient, test_session: Session):
+    response = client.delete("/payment/?payment_id=4")
+    assert response.status_code == 200
+    assert response.json() == {'message': 'Payment deleted successfully'}
+
+    response = client.get("/payment/4")
+    assert response.status_code == 404
+    assert response.json() == {'detail': 'Item not Found'}
+
+    response = client.get("/expense/2")
+    assert response.status_code == 200
+    assert response.json() == {'id': 2, 'description': 'Dinner day 1', 'trip_id': 1, 'users': [{'id': 1, 'username': 'kartik'}, {'id': 3, 'username': 'suman'}, {'id': 4, 'username': 'A.k Singh'}], 'payments': [{'id': 2, 'currency': 'INR', 'amount': 350.0, 'payment_mode': 'UPI', 'user': {'id': 1, 'username': 'kartik'}}, {'id': 3, 'currency': 'INR', 'amount': 200.0, 'payment_mode': 'UPI', 'user': {'id': 3, 'username': 'suman'}}]}
+
+def test_get_equal_share_distribution(client: TestClient, test_session: Session):
+    expenses = []
+    response = client.get("/expense/trip/all/?trip_id=1&offset=0&limit=10")
+    assert response.status_code == 200
+    assert response.json() == [{'id': 2, 'description': 'Dinner day 1', 'trip_id': 1, 'users': [{'id': 1, 'username': 'kartik'}, {'id': 3, 'username': 'suman'}, {'id': 4, 'username': 'A.k Singh'}], 'payments': [{'id': 2, 'currency': 'INR', 'amount': 350.0, 'payment_mode': 'UPI', 'user': {'id': 1, 'username': 'kartik'}}, {'id': 3, 'currency': 'INR', 'amount': 200.0, 'payment_mode': 'UPI', 'user': {'id': 3, 'username': 'suman'}}]}]
+    expenses = response.json()
+
+    response = client.post("/payment/distribute", json=[2])
+    assert response.status_code == 200
+    assert response.json() == ['4 needs to give INR 166.67 to 1', '4 needs to give INR 16.67 to 3']
