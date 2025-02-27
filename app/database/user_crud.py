@@ -1,6 +1,3 @@
-from sqlite3 import IntegrityError
-from fastapi import HTTPException, status
-from app.database.db_main import engine
 from sqlmodel import Session, select, update
 from app.models import *
 from app.database.db_models import *
@@ -53,7 +50,10 @@ def get_trips_created_by_user_from_db(offset: int, limit: int, email: EmailStr, 
     try:
         statement = select(User).where(User.email == email).options(selectinload(User.user_created_trips))
         result = session.exec(statement).first()
-        user_created_trips = result.user_created_trips
+        user_created_trips = []
+        if result:
+            user_created_trips = result.user_created_trips
+
         length_of_user_created_trips = len(user_created_trips)
         if offset < length_of_user_created_trips:
             if offset + limit < length_of_user_created_trips:
@@ -70,7 +70,10 @@ def get_trips_participated_by_user_from_db(offset: int, limit: int, email: Email
     try:
         statement = select(User).where(User.email == email).options(selectinload(User.trips))
         result = session.exec(statement).first()
-        trips_in_which_user_participated = result.trips
+        trips_in_which_user_participated = []
+        if result:
+            trips_in_which_user_participated = result.trips
+
         length_of_trips_in_which_user_participated = len(trips_in_which_user_participated)
         if offset < length_of_trips_in_which_user_participated:
             if offset + limit < length_of_trips_in_which_user_participated:
@@ -88,7 +91,10 @@ def get_payments_done_by_user_from_db(offset: int, limit: int, email: EmailStr, 
     try:
         statement = select(User).where(User.email == email).options(selectinload(User.payments))
         result = session.exec(statement).first()
-        user_payments = result.payments
+        user_payments = []
+        if result:
+            user_payments = result.payments
+
         length_of_user_payments = len(user_payments)
         if offset < length_of_user_payments:
             if offset + limit < length_of_user_payments:
@@ -122,7 +128,7 @@ def update_user_username_in_db(new_username: str, email:EmailStr, session: Sessi
         session.rollback()
         raise e
 
-def update_user_date_of_birth_in_db(new_date_of_birth: str, email:EmailStr, session: Session):
+def update_user_date_of_birth_in_db(new_date_of_birth: date, email:EmailStr, session: Session):
     try:
         statement = update(User).where(User.email == email).values(date_of_birth = new_date_of_birth)
         session.exec(statement)

@@ -22,7 +22,6 @@ def create_payment(payment: Payment_Create, session: Session = Depends(get_sessi
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
 
-
 @router.post("/payment/distribute", status_code=status.HTTP_200_OK)
 def get_equal_share_distribution(expense_ids: List[int],  session: Session = Depends(get_session)):
     try:

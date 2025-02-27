@@ -6,7 +6,6 @@ from app.database.db_main import get_session
 from app.database.trip_crud import *
 from app.database.user_crud import get_user_by_email
 from app.models import Trip_Create, Trip_Read
-from sqlalchemy.exc import NoResultFound
 from app.util.auth import get_current_user
 
 admin_user_email = "adminUser@gmail.com"
@@ -24,25 +23,25 @@ def create_trip(trip: Trip_Create, current_user: User_Read = Depends(get_current
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
 
 @router.get("/trip/all", status_code=status.HTTP_200_OK, response_model=List[Trip_Read])
-def get_all_trips(offset: int = Query(ge=0), limit: int = Query(gt=0), session: Session = Depends(get_session)):
+def get_all_trips(offset: int = Query(ge=0), limit: int = Query(gt=0), current_user: User_Read = Depends(get_current_user), session: Session = Depends(get_session)):
     try:
         result = get_all_trips_from_db(offset, limit, session)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
 
     if not result:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Item not Found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Trip not Found")
     return result
 
 @router.get("/trip/{trip_id}", status_code=status.HTTP_200_OK, response_model=Trip_Read)
-def get_trip_by_id(trip_id: int, session: Session = Depends(get_session)):
+def get_trip_by_id(trip_id: int, current_user: User_Read = Depends(get_current_user), session: Session = Depends(get_session)):
     try:
         result = get_trip_by_id_from_db(trip_id, session) 
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
 
     if not result:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Item not Found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Trip not Found")
     return result
 
 @router.get("/trip", status_code=status.HTTP_200_OK, response_model=List[Trip_Read])
@@ -128,6 +127,7 @@ def add_traveller_to_the_trip(trip_id: int, user_id: int, current_user: User_Rea
 def update_trip_startdate_and_enddate(trip_id: int, start_date: Optional[date] = Query(None), end_date: Optional[date] = Query(None), current_user: User_Read = Depends(get_current_user), session: Session = Depends(get_session)):
     if not (start_date or end_date):
             raise HTTPException(status_code=status.HTTP_200_OK, detail=f"start date or end date not passed")
+
     try:
         trip = get_trip_by_id_from_db(trip_id, session)
     except Exception as e:

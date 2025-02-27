@@ -1,12 +1,9 @@
 from fastapi import HTTPException, status
-from app.database.db_main import engine
 from sqlmodel import Session, select, update
-from app.database.user_crud import get_user_by_id_from_db
 from app.models import *
 from app.database.db_models import *
 from sqlalchemy.orm import selectinload
 from sqlalchemy import and_
-from sqlalchemy import orm
 
 def create_trip_in_db(trip: Trip_Create, current_user: User, session: Session):
     try:
@@ -47,10 +44,11 @@ def create_trip_in_db(trip: Trip_Create, current_user: User, session: Session):
 
 def get_all_trips_from_db(offset: int, limit: int, session: Session):
     try:
-        statement = select(Trip).order_by(Trip.title).offset(offset).limit(limit).options(orm.selectinload(Trip.created_by))
+        statement = select(Trip).order_by(Trip.title).offset(offset).limit(limit).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
         for item in result:
             users = item.users
+
         return result
     except Exception as e:
         raise e
@@ -62,6 +60,7 @@ def get_trip_by_id_from_db(trip_id: int, session: Session):
         if result:
             users = result.users
             expenses = result.expenses
+
         return result
     except Exception as e:
         raise e
@@ -70,8 +69,8 @@ def filter_trip_by_user(user_id: int, title: str, session: Session):
     try:
         statement = select(Trip).where(Trip.created_by_id == user_id, Trip.title.like(f"%{title}%")).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
-        for item in result:
-            travellers = item.users
+        for trip in result:
+            travellers = trip.users
 
         return result
     except Exception as e:
@@ -81,8 +80,8 @@ def get_user_trips_starting_after_specified_date(user_id: int, start_after: date
     try:
         statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date > start_after, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
-        for item in result:
-            travellers = item.users
+        for trip in result:
+            travellers = trip.users
 
         return result
     except Exception as e:
@@ -92,8 +91,8 @@ def get_user_trips_starting_before_specified_date(user_id: int, start_before: da
     try:
         statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date < start_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
-        for item in result:
-            travellers = item.users
+        for trip in result:
+            travellers = trip.users
 
         return result
     except Exception as e:
@@ -103,8 +102,8 @@ def get_user_trips_ending_after_specified_date(user_id: int, end_after: date, ti
     try:
         statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.end_date > end_after, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
-        for item in result:
-            travellers = item.users
+        for trip in result:
+            travellers = trip.users
 
         return result
     except Exception as e:
@@ -114,8 +113,8 @@ def get_user_trips_ending_before_specified_date(user_id: int, end_before: date, 
     try:
         statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.end_date < end_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
-        for item in result:
-            travellers = item.users
+        for trip in result:
+            travellers = trip.users
 
         return result
     except Exception as e:
@@ -125,8 +124,8 @@ def get_user_trips_starting_between_specified_dates(user_id: int, start_after: d
     try:
         statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date > start_after, Trip.start_date < start_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
-        for item in result:
-            travellers = item.users
+        for trip in result:
+            travellers = trip.users
 
         return result
     except Exception as e:
@@ -136,8 +135,8 @@ def get_user_trips_ending_between_specified_dates(user_id: int, end_after: date,
     try:
         statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.end_date > end_after, Trip.end_date < end_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
-        for item in result:
-            travellers = item.users
+        for trip in result:
+            travellers = trip.users
 
         return result
     except Exception as e:
@@ -147,8 +146,8 @@ def get_user_trips_starting_and_ending_within_specified_daterange(user_id: int, 
     try:
         statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date > start_after, Trip.end_date < end_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
-        for item in result:
-            travellers = item.users
+        for trip in result:
+            travellers = trip.users
 
         return result
     except Exception as e:
@@ -158,8 +157,8 @@ def get_user_trips_starting_after_and_ending_after_specified_dates(user_id: int,
     try:
         statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date > start_after, Trip.end_date > end_after, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
-        for item in result:
-            travellers = item.users
+        for trip in result:
+            travellers = trip.users
 
         return result
     except Exception as e:
@@ -169,8 +168,8 @@ def get_user_trips_starting_before_and_ending_after_specified_dates(user_id: int
     try:
         statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date < start_before, Trip.end_date > end_after, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
-        for item in result:
-            travellers = item.users
+        for trip in result:
+            travellers = trip.users
 
         return result
     except Exception as e:
@@ -180,8 +179,8 @@ def get_user_trips_starting_before_and_ending_before_specified_dates(user_id: in
     try:
         statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date < start_before, Trip.end_date < end_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
-        for item in result:
-            travellers = item.users
+        for trip in result:
+            travellers = trip.users
 
         return result
     except Exception as e:
@@ -191,8 +190,8 @@ def get_user_trips_starting_within_daterange_and_ending_after_specified_date(use
     try:
         statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date > start_after, Trip.start_date < start_before, Trip.end_date > end_after, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
-        for item in result:
-            travellers = item.users
+        for trip in result:
+            travellers = trip.users
 
         return result
     except Exception as e:
@@ -202,8 +201,8 @@ def get_user_trips_starting_within_daterange_and_ending_before_specified_date(us
     try:
         statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date > start_after, Trip.start_date < start_before, Trip.end_date < end_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
-        for item in result:
-            travellers = item.users
+        for trip in result:
+            travellers = trip.users
 
         return result
     except Exception as e:
@@ -213,8 +212,8 @@ def get_user_trips_ending_within_daterange_and_starting_after_specified_date(use
     try:
         statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date > start_after, Trip.end_date > end_after, Trip.end_date < end_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
-        for item in result:
-            travellers = item.users
+        for trip in result:
+            travellers = trip.users
 
         return result
     except Exception as e:
@@ -224,8 +223,8 @@ def get_user_trips_ending_within_daterange_and_starting_before_specified_date(us
     try:
         statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date < start_before, Trip.end_date > end_after, Trip.end_date < end_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
-        for item in result:
-            travellers = item.users
+        for trip in result:
+            travellers = trip.users
 
         return result
     except Exception as e:
@@ -235,8 +234,8 @@ def get_user_trips_starting_within_daterange_and_ending_within_daterange(user_id
     try:
         statement = select(Trip).where(and_(Trip.created_by_id == user_id, Trip.start_date > start_after, Trip.start_date < start_before, Trip.end_date > end_after, Trip.end_date < end_before, Trip.title.like(f"%{title}%"))).options(selectinload(Trip.created_by))
         result = session.exec(statement).all()
-        for item in result:
-            travellers = item.users
+        for trip in result:
+            travellers = trip.users
 
         return result
     except Exception as e:
@@ -271,15 +270,17 @@ def remove_trip_from_db(trip_id: int, session: Session):
     try:
         statement = select(UserTripLink).where(UserTripLink.trip_id == trip_id)
         result = session.exec(statement).all()
-        for item in result:
-            session.delete(item)
-            session.commit()
+        if result:
+            for item in result:
+                session.delete(item)
+                session.commit()
 
         statement = select(Expense).where(Expense.trip_id == trip_id)
         result = session.exec(statement).all()
-        for item in result:
-            session.delete(item)
-            session.commit()
+        if result:
+            for item in result:
+                session.delete(item)
+                session.commit()
 
         statement = select(Trip).where(Trip.id == trip_id)
         result = session.exec(statement).first()
@@ -288,6 +289,7 @@ def remove_trip_from_db(trip_id: int, session: Session):
             session.commit()
             return {"message": "Trip deleted successfully"}
         else:
+            session.rollback()
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found")
     except Exception as e:
         session.rollback()
