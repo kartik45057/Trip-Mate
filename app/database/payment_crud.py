@@ -1,8 +1,7 @@
 from typing import List
 from sqlmodel import Session, select, update
-from app.database.db_models import Expense, Payment, Trip, User
-from app.models import Expense_Create, Payment_Create
-from app.database.db_main import engine
+from app.database.db_models import Payment
+from app.models import Payment_Create
 from sqlalchemy.orm import selectinload
 
 def create_payment_in_db(payment: Payment_Create, session: Session):
@@ -81,7 +80,7 @@ def delete_payment_from_db(payment_id: int, session: Session):
             session.delete(result)
             session.commit()
             return {"message": "Payment deleted successfully"}
-        
+
         return None
     except Exception as e:
         session.rollback()

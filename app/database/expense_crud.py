@@ -28,21 +28,7 @@ def create_expense_in_db(expense: Expense_Create, current_user: User, session: S
     except Exception as e:
         session.rollback()
         raise e
-    
-def get_all_expenses_for_the_trip_from_db(trip_id: int, offset: int, limit: int, session: Session):
-    try:
-        statement = select(Expense).where(Expense.trip_id == trip_id).options(selectinload(Expense.users))
-        statement = statement.order_by(Expense.id)
-        statement = statement.offset(offset).limit(limit)
-        result = session.exec(statement).all()
-        for item in result:
-            payments = item.payments
-            trip = item.trip
 
-        return result
-    except Exception as e:
-        raise e
-    
 def get_expense_details_from_db(expense_id: int, session: Session):
     try:
         statement = select(Expense).where(Expense.id == expense_id).options(selectinload(Expense.users))
@@ -71,17 +57,17 @@ def get_all_expenses_by_ids(expense_ids: List[int], session: Session):
     except Exception as e:
         raise e
     
-def update_expense_description_in_db(expense_id, new_description, session):
+def update_expense_description_in_db(expense_id: int, new_description: str, session: Session):
     try:
         statement = update(Expense).where(Expense.id == expense_id).values(description = new_description)
-        result = session.exec(statement)
+        session.exec(statement)
         session.commit()
         return {"message": "Description updated successfully"}
     except Exception as e:
         session.rollback()
         raise e
     
-def delete_expense_in_db(expense_id, session):
+def delete_expense_in_db(expense_id: int, session: Session):
     try:
         statement = select(Expense).where(Expense.id == expense_id)
         expense = session.exec(statement).first()
@@ -95,8 +81,9 @@ def delete_expense_in_db(expense_id, session):
                 session.delete(payment)
 
             session.commit()
-        return {"message": "Expense deleted successfully"}
+            return {"message": "Expense deleted successfully"}
+        else:
+            return None
     except Exception as e:
         session.rollback()
         raise e
-

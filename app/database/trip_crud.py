@@ -60,8 +60,7 @@ def get_trip_by_id_from_db(trip_id: int, session: Session):
         if result:
             users = result.users
             expenses = result.expenses
-
-        return result
+            return result
     except Exception as e:
         raise e
 
@@ -240,6 +239,20 @@ def get_user_trips_starting_within_daterange_and_ending_within_daterange(user_id
         return result
     except Exception as e:
         raise e
+    
+def get_all_expenses_for_the_trip_from_db(trip_id: int, offset: int, limit: int, session: Session):
+    try:
+        statement = select(Expense).where(Expense.trip_id == trip_id).options(selectinload(Expense.users))
+        statement = statement.order_by(Expense.id)
+        statement = statement.offset(offset).limit(limit)
+        result = session.exec(statement).all()
+        for item in result:
+            payments = item.payments
+            trip = item.trip
+
+        return result
+    except Exception as e:
+        raise e
 
 def add_traveller_to_the_trip_in_db(trip_id: int, user_id: int, session: Session):
     try:
@@ -261,7 +274,7 @@ def remove_traveller_from_the_trip_in_db(trip_id: int, user_id: int, session: Se
             session.commit()
             return {"message": "User removed from the trip successfully"}
         else:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+            return None
     except Exception as e:
         session.rollback()
         raise e
@@ -290,7 +303,7 @@ def remove_trip_from_db(trip_id: int, session: Session):
             return {"message": "Trip deleted successfully"}
         else:
             session.rollback()
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found")
+            return None
     except Exception as e:
         session.rollback()
         raise e
@@ -307,7 +320,7 @@ def update_trip_startdate_and_enddate_in_db(trip_id: int, trip_start_date: Optio
             statement = query.values(end_date=trip_end_date)
 
         if statement is not None:
-            result = session.exec(statement)
+            session.exec(statement)
             session.commit()
             return {"message": "Date updated successfully"}
     except Exception as e:
@@ -317,7 +330,7 @@ def update_trip_startdate_and_enddate_in_db(trip_id: int, trip_start_date: Optio
 def update_trip_title_in_db(trip_id: int, trip_title: str, session: Session):
     try:
         statement = update(Trip).where(Trip.id == trip_id).values(title = trip_title)
-        result = session.exec(statement)
+        session.exec(statement)
         session.commit()
         return {"message": "Title updated successfully"}
     except Exception as e:

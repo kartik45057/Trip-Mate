@@ -411,8 +411,8 @@ def test_remove_traveller_from_the_trip_which_do_not_exists(client_user3: TestCl
 
 def test_remove_traveller_which_do_not_exits_from_the_trip(client_user3: TestClient, test_session: Session):
     response = client_user3.delete("/trip/traveller/remove/?trip_id=3&user_id=8")
-    assert response.status_code == 500
-    assert response.json() == {'detail': 'An error occurred: 404: User not found'}
+    assert response.status_code == 404
+    assert response.json() == {'detail': 'User not found'}
 
 def test_update_trip_title_authorized(client: TestClient, test_session: Session):
     response = client.put("/trip/update/title/?trip_id=1&title=Kedarnath, Tungnath, Deoriatal")
@@ -640,14 +640,14 @@ def test_get_expense_by_id(client: TestClient):
 
     response = client.get("/expense/3")
     assert response.status_code == 404
-    assert response.json() == {'detail': 'Item not Found'}
+    assert response.json() == {'detail': 'Expense not Found'}
 
 def test_get_all_expenses_for_the_trip(client: TestClient):
-    response = client.get("/expense/trip/all/?trip_id=1&offset=0&limit=1")
+    response = client.get("/trip/expense/all/?trip_id=1&offset=0&limit=1")
     assert response.status_code == 200
     assert response.json() == [{'id': 1, 'description': 'Breakfast day 1', 'trip_id': 1, 'users': [{'id': 1, 'username': 'kartik'}, {'id': 3, 'username': 'suman'}, {'id': 4, 'username': 'A.k Singh'}], 'payments': [{'id': 1, 'currency': 'INR', 'amount': 500.0, 'payment_mode': 'Cash', 'user': {'id': 1, 'username': 'kartik'}}]}]
     
-    response = client.get("/expense/trip/all/?trip_id=1&offset=0&limit=10")
+    response = client.get("/trip/expense/all/?trip_id=1&offset=0&limit=10")
     assert response.status_code == 200
     assert response.json() == [{'id': 1, 'description': 'Breakfast day 1', 'trip_id': 1, 'users': [{'id': 1, 'username': 'kartik'}, {'id': 3, 'username': 'suman'}, {'id': 4, 'username': 'A.k Singh'}], 'payments': [{'id': 1, 'currency': 'INR', 'amount': 500.0, 'payment_mode': 'Cash', 'user': {'id': 1, 'username': 'kartik'}}]}, {'id': 2, 'description': 'Dinner day 1', 'trip_id': 1, 'users': [{'id': 1, 'username': 'kartik'}, {'id': 3, 'username': 'suman'}, {'id': 4, 'username': 'A.k Singh'}], 'payments': [{'id': 2, 'currency': 'INR', 'amount': 350.0, 'payment_mode': 'Cash', 'user': {'id': 1, 'username': 'kartik'}}, {'id': 3, 'currency': 'INR', 'amount': 200.0, 'payment_mode': 'UPI', 'user': {'id': 3, 'username': 'suman'}}]}]
 
@@ -678,6 +678,7 @@ def test_delete_expense(client: TestClient, test_session: Session):
     assert len(result) == 3
 
     response = client.delete("/expense/?expense_id=1")
+    print(response.json())
     assert response.status_code == 200
     assert response.json() == {"message": "Expense deleted successfully"}
 
@@ -700,7 +701,7 @@ def test_get_payment_details_by_id(client: TestClient):
 
     response = client.get("/payment/1")
     assert response.status_code == 404
-    assert response.json() == {'detail': 'Item not Found'}
+    assert response.json() == {'detail': 'Payment not Found'}
 
 def test_update_payment_details(client: TestClient, test_session: Session):
     statement = select(Payment).where(Payment.id == 2)
@@ -765,7 +766,7 @@ def test_delete_payment(client: TestClient, test_session: Session):
 
     response = client.get("/payment/4")
     assert response.status_code == 404
-    assert response.json() == {'detail': 'Item not Found'}
+    assert response.json() == {'detail': 'Payment not Found'}
 
     response = client.get("/expense/2")
     assert response.status_code == 200
@@ -773,7 +774,7 @@ def test_delete_payment(client: TestClient, test_session: Session):
 
 def test_get_equal_share_distribution(client: TestClient, test_session: Session):
     expenses = []
-    response = client.get("/expense/trip/all/?trip_id=1&offset=0&limit=10")
+    response = client.get("/trip/expense/all/?trip_id=1&offset=0&limit=10")
     assert response.status_code == 200
     assert response.json() == [{'id': 2, 'description': 'Dinner day 1', 'trip_id': 1, 'users': [{'id': 1, 'username': 'kartik'}, {'id': 3, 'username': 'suman'}, {'id': 4, 'username': 'A.k Singh'}], 'payments': [{'id': 2, 'currency': 'INR', 'amount': 350.0, 'payment_mode': 'UPI', 'user': {'id': 1, 'username': 'kartik'}}, {'id': 3, 'currency': 'INR', 'amount': 200.0, 'payment_mode': 'UPI', 'user': {'id': 3, 'username': 'suman'}}]}]
     expenses = response.json()

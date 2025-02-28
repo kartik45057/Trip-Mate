@@ -6,7 +6,7 @@ from app.database.db_main import get_session
 from app.database.expense_crud import get_all_expenses_by_ids
 from app.database.payment_crud import create_payment_in_db, delete_payment_from_db, get_payment_by_id_from_db, update_payment_details_in_db
 from app.enums import CurrencyCode, PaymentMode
-from app.models import Expense_Split_Exp, Payment_Create, Payment_Read, User_Read
+from app.models import Payment_Create, Payment_Read
 from app.thirdPartyApi.exchange_rates import get_exchange_rates
 from app.util.split_expenses import Get_Display_Messages, Get_Equal_Share_Distribution
 
@@ -39,14 +39,17 @@ def get_payment_details_by_id(payment_id: int, session: Session = Depends(get_se
         result = get_payment_by_id_from_db(payment_id, session)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
-    
+
     if not result:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Item not Found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Payment not Found")
     return result
 
 @router.put("/payment", status_code=status.HTTP_200_OK)
 def update_payment_details(payment_id: int, currency: Optional[CurrencyCode] = Query(None), amount: Optional[float] = Query(None), payment_mode: Optional[PaymentMode] = Query(None), user_id: Optional[int] = Query(None), session: Session = Depends(get_session)):
     try:
+        if not(currency or amount or payment_mode or user_id):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Nothing to update")
+
         result = update_payment_details_in_db(payment_id, currency, amount, payment_mode, user_id, session)
         return result
     except Exception as e:
@@ -58,9 +61,8 @@ def delete_payment(payment_id: int,  session: Session = Depends(get_session)):
         result = delete_payment_from_db(payment_id, session)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
-    
+
     if not result:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Item not Found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Payment not Found")
 
     return result
-

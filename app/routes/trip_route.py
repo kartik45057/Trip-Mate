@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, Query, status
 from fastapi.params import Depends
 from app.database.db_main import get_session
 from app.database.trip_crud import *
-from app.database.user_crud import get_user_by_email
+from app.database.user_crud import get_user_by_email, get_user_by_id_from_db
 from app.models import Trip_Create, Trip_Read
 from app.util.auth import get_current_user
 
@@ -99,6 +99,17 @@ def get_filtered_trips_based_on_dates_and_title_for_user(trips_created_by_user_i
 
     return result
 
+@router.get("/trip/expense/all", status_code=status.HTTP_200_OK, response_model=List[Expense_Read])
+def get_all_expenses_for_the_trip(trip_id: int, offset: int, limit: int, current_user: User_Read = Depends(get_current_user), session: Session = Depends(get_session)):
+    try:
+        result = get_all_expenses_for_the_trip_from_db(trip_id, offset, limit, session)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
+
+    if not result:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Item not Found")
+    return result
+
 @router.put("/trip/traveller/add", status_code=status.HTTP_200_OK)
 def add_traveller_to_the_trip(trip_id: int, user_id: int, current_user: User_Read = Depends(get_current_user), session: Session = Depends(get_session)):
     try:
@@ -124,7 +135,7 @@ def add_traveller_to_the_trip(trip_id: int, user_id: int, current_user: User_Rea
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
 
 @router.put("/trip/update/dates", status_code=status.HTTP_200_OK)
-def update_trip_startdate_and_enddate(trip_id: int, start_date: Optional[date] = Query(None), end_date: Optional[date] = Query(None), current_user: User_Read = Depends(get_current_user), session: Session = Depends(get_session)):
+def update_trip_dates(trip_id: int, start_date: Optional[date] = Query(None), end_date: Optional[date] = Query(None), current_user: User_Read = Depends(get_current_user), session: Session = Depends(get_session)):
     if not (start_date or end_date):
             raise HTTPException(status_code=status.HTTP_200_OK, detail=f"start date or end date not passed")
 
@@ -170,6 +181,9 @@ def delete_trip(trip_id: int, current_user: User_Read = Depends(get_current_user
         trip = get_trip_by_id_from_db(trip_id, session)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
+    
+    if not trip:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found")
 
     if not trip.created_by_id == current_user.id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Insufficient privileges")
@@ -195,6 +209,10 @@ def remove_traveller_from_the_trip(trip_id: int, user_id: int, current_user: Use
 
     try:
         result = remove_traveller_from_the_trip_in_db(trip_id, user_id, session)
-        return result
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
+    
+    if not result:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    return result
