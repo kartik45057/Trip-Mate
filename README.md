@@ -1,4 +1,4 @@
-                                            Trip-Mate: Effortless Trip Management & Expense Tracking
+                    Trip-Mate: Effortless Trip Management & Expense Tracking
 The Problem:
 
     Imagine planning a team trip or a spontaneous trip with friends. The excitement is palpable! But then comes the inevitable: coordinating expenses. Who paid for lunch? How much does everyone owe for the rental car? Splitting costs for activities? The chaos of manual tracking on spreadsheets or scattered notes quickly dampens the spirit of the trip.
