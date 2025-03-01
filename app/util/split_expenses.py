@@ -3,7 +3,7 @@ from app.models import Expense_Read
 from app.thirdPartyApi.exchange_rates import get_exchange_rates
 
 
-def Distribute_Amounts(expenses, split_between, exchanges_rates_INR):
+def Distribute_Amounts(expenses, split_between, exchanges_rates_INR, username_by_user_id):
     no_of_users = len(split_between)
     amount_paid_by_user_id = {}
     total_amount_paid_during_trip = 0
@@ -14,6 +14,8 @@ def Distribute_Amounts(expenses, split_between, exchanges_rates_INR):
             payments = expense.payments
             for payment in payments:
                 user_id = payment.user.id
+                username = payment.user.username
+                username_by_user_id[user_id] = username
                 amount_paid_by_user = payment.amount
                 currency = payment.currency
                 if not currency == CurrencyCode.INR:
@@ -65,22 +67,35 @@ def Distribute_Amounts(expenses, split_between, exchanges_rates_INR):
 
     return amount_to_be_received_and_from_by_userid
 
-def Get_Display_Messages(amount_to_be_received_and_from_by_userid):
+def Get_Display_Messages(amount_to_be_received_and_from_by_userid, username_by_user_id, exchanges_rates_INR, currency = CurrencyCode.INR):
     display_messages = []
     for user_receiving_amount in amount_to_be_received_and_from_by_userid:
         for user_giving_amount in amount_to_be_received_and_from_by_userid[user_receiving_amount]:
-            amount = round(amount_to_be_received_and_from_by_userid[user_receiving_amount][user_giving_amount], 2)
-            currency = "INR"
-            msg = f"{user_giving_amount} needs to give {currency} {amount} to {user_receiving_amount}"
+            amount = amount_to_be_received_and_from_by_userid[user_receiving_amount][user_giving_amount]
+            if not currency == CurrencyCode.INR:
+                if currency in exchanges_rates_INR:
+                    exchange_rate = exchanges_rates_INR[currency]
+                    amount = amount * exchange_rate
+                else:
+                    raise Exception(f"The {currency} to INR exchange rate is unavailable.")
+
+            amount = round(amount, 2)
+            msg = f"{username_by_user_id[user_giving_amount]} needs to give {currency} {amount} to {username_by_user_id[user_receiving_amount]}"
             display_messages.append(msg)
     return display_messages
 
 def Get_Equal_Share_Distribution(expenses, exchanges_rates_INR):
     split_between_by_expenses = {}
+    username_by_user_id = {}
     for expense in expenses:
         split_between = expense.users
         if not split_between:
             continue
+        
+        for user in split_between:
+            username = user.username
+            user_id = user.id
+            username_by_user_id[user_id] = username
 
         split_between = list(map(lambda user: user.id, split_between))
         split_between.sort()
@@ -93,7 +108,7 @@ def Get_Equal_Share_Distribution(expenses, exchanges_rates_INR):
     amount_to_be_received_from_by_userid_from_multiple_grp_of_expenses = []
     for split_between in split_between_by_expenses:
         expenses = split_between_by_expenses[split_between]
-        amount_to_be_received_from_by_userid = Distribute_Amounts(expenses, split_between, exchanges_rates_INR)
+        amount_to_be_received_from_by_userid = Distribute_Amounts(expenses, split_between, exchanges_rates_INR, username_by_user_id)
         amount_to_be_received_from_by_userid_from_multiple_grp_of_expenses.append(amount_to_be_received_from_by_userid)
 
     #amount_to_be_received_from_by_userid_from_multiple_grp_of_expenses  = [{'user1': {'user3': 850.0}, 'user2': {'user3': 1000.0}}, {'user3': {'user1': 1000.0}, 'user2': {'user1': 1000.0}}, {'user1': {'user2': 2500.0}}]
@@ -133,4 +148,4 @@ def Get_Equal_Share_Distribution(expenses, exchanges_rates_INR):
                     if len(merged_dict[user_to_be_paid]) <= 0:
                         merged_dict.pop(user_to_be_paid)
 
-    return merged_dict
+    return merged_dict, username_by_user_id

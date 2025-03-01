@@ -781,4 +781,4 @@ def test_get_equal_share_distribution(client: TestClient, test_session: Session)
 
     response = client.post("/payment/distribute", json=[2])
     assert response.status_code == 200
-    assert response.json() == ['4 needs to give INR 166.67 to 1', '4 needs to give INR 16.67 to 3']
+    assert response.json() == ['A.k Singh needs to give INR 166.67 to kartik', 'A.k Singh needs to give INR 16.67 to suman']

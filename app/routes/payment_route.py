@@ -27,8 +27,8 @@ def get_equal_share_distribution(expense_ids: List[int],  session: Session = Dep
     try:
         expenses = get_all_expenses_by_ids(expense_ids, session)
         exchanges_rates_INR = get_exchange_rates()
-        amount_to_be_received_and_from_by_userid = Get_Equal_Share_Distribution(expenses, exchanges_rates_INR)
-        result = Get_Display_Messages(amount_to_be_received_and_from_by_userid)
+        amount_to_be_received_and_from_by_userid, username_by_user_id = Get_Equal_Share_Distribution(expenses, exchanges_rates_INR)
+        result = Get_Display_Messages(amount_to_be_received_and_from_by_userid, username_by_user_id, exchanges_rates_INR)
         return result
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")

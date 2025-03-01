@@ -91,7 +91,7 @@ class Payment_Split_Exp(BaseModel):
     id: int = Field(description="Unique identifier for the payment")
     currency: CurrencyCode = Field(description="The currency of the payment (allowed values: INR, USD, EUR)")
     amount: float = Field(description="The amount of the payment in the specified currency")
-    user: User_Read = Field(description="user who has done the payment")
+    user: User_Read_id_username = Field(description="user who has done the payment")
 
 class Expense_Create(BaseModel):
     description: Optional[str] = Field(default=None, min_length=10, max_length=100, description="Details of expense, eg: 2000 rupees spend for dinner at cafe")

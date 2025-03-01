@@ -12,7 +12,7 @@ Story:
     Day 1 Lunch (1 PM): Total ₹1200, paid ₹1000 by Rajat and ₹200 by Vatsal. To be split between me, Vatsal, and Rajat.
     Coffee (4 PM): Total ₹800, paid by me, split between the three of us.
     Water Sports: Total ₹3000, paid by Rajat, split only between me and Rajat as Vatsal opted out.
-    I resorted to a spreadsheet, which was cumbersome and prone to errors. It was clear: there had to be a better way.
+    I resorted to a spreadsheet, which was cumbersome and prone to errors. So there had to be a better way.
 
 The Solution: "Trip-Mate"
 
@@ -21,7 +21,7 @@ The Solution: "Trip-Mate"
     => Effortless Trip Planning.
     => Create and manage trip itineraries.
     => Collaborate with fellow travelers on planning.
-    => Seamless Expense Tracking:
+    => Seamless Expense Tracking.
     => Log expenses with details like date, time, description, and total amount.
     => Record who paid and how much.
     => Intuitively split expenses between participants, even with varying shares.
